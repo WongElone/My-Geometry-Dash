@@ -1,0 +1,47 @@
+.gd-button-container {
+    min-width: 200px;
+}
+
+.gd-button {
+    border: 2px solid #fff;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    font-size: 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: .1s;
+    width: 100%;
+    height: 100%;
+}
+
+.gd-button:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.gd-button:active {
+    transform: scale(0.95);
+}
+
+@keyframes gd-button-impulse-bg {
+    from {
+        background-color:rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        background-color:rgba(255, 255, 255, 0.25);
+    }
+
+    to {
+        background-color:rgba(255, 255, 255, 0.1);
+    }
+}
+
+.gd-button.gd-button--impulse-bg {
+    animation-name: gd-button-impulse-bg;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-delay: 1s;
+}
