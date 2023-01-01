@@ -32,9 +32,14 @@ export default function GdMapSelection() {
     },
   ]
 
-  function startBtnClickHandler() {
+  function startBtnClickHandler({appState, setAppState}) {
     const mapInfo = mapsInfoList[mapSwiper.activeIndex];
-    console.log(mapInfo);
+    const game = {
+      map: {
+        path: mapInfo.path,
+      }
+    }
+    setAppState({...appState, in: 'game', game})
   }
 
   return (
@@ -123,7 +128,7 @@ export default function GdMapSelection() {
               disabled={startBtnProps.disabled}
               hidden={startBtnProps.hidden}
               impulseBg={true}
-              onClick={startBtnClickHandler}
+              onClick={() => startBtnClickHandler({appState, setAppState})}
             >
               Start !
             </GdButton>
