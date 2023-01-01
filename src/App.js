@@ -11,8 +11,6 @@ function App() {
     in: "home",
   });
 
-  console.log(appState.in);
-
   return (
     <AppContext.Provider value={{ appState, setAppState }}>
       <div className="gd-app">

@@ -30,4 +30,14 @@
       padding: 15px;
     }
   }
+
+  .btns-container {
+    > * {
+        margin-bottom: 15px;
+    }
+
+    > *:last-child {
+        margin-bottom: 0;
+    }
+  }
 }
