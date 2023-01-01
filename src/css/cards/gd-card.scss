@@ -14,15 +14,6 @@
 .gd-card-container.gd-card-container--map-selection {
   .gd-card {
     cursor: pointer;
-    transition: 0.1s ease-in-out;
-
-    &:hover {
-      transform: scale(1.05);
-      border-style: solid;
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
+    transition: 0.2s ease-in-out;
   }
 }
