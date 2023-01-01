@@ -21,10 +21,17 @@ function App() {
     <AppContext.Provider value={{ appState, setAppState }}>
       <div className="gd-app">
         <h1 style={{ display: "none" }}>Geometry Dash</h1>
-        {appState.in === "home" && <GdHome />}
-        {appState.in === "select-map" && <GdMapSelection />}
-        {appState.in === "home->settings" && <GdHomeSettings />}
-        {appState.in === "game" && <GdGame />}
+        {(() => {
+          if (appState.in === 'home') {
+            return <GdHome />
+          } else if (appState.in === 'select-map') {
+            return <GdMapSelection />
+          } else if (appState.in === 'home->settings') {
+            return <GdHomeSettings />
+          } else if (appState.in === 'game') {
+            return <GdGame />
+          }
+        })()}
       </div>
     </AppContext.Provider>
   );
