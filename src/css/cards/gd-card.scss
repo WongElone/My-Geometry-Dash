@@ -1,0 +1,28 @@
+.gd-card-container {
+  width: 260px;
+  height: 260px;
+
+  .gd-card {
+    width: 100%;
+    height: 100%;
+    border: 3px outset #fff;
+    border-radius: 30px;
+    overflow: hidden;
+  }
+}
+
+.gd-card-container.gd-card-container--map-selection {
+  .gd-card {
+    cursor: pointer;
+    transition: 0.1s ease-in-out;
+
+    &:hover {
+      transform: scale(1.05);
+      border-style: solid;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}

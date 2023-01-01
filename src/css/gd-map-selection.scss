@@ -1,0 +1,21 @@
+.gd-map-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: 100px;
+
+    .title {
+        font-size: 40px;
+        margin-top: 30px;
+    }
+
+    .map-listing-container {
+        padding: 15px;
+
+        .map-listing {
+            display: flex;
+            column-gap: 30px;
+        }
+    }
+}

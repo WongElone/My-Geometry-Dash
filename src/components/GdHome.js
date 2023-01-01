@@ -1,16 +1,29 @@
-import React from 'react'
-import GdButton from './GdButton'
-import '../css/gd-home.scss'
+import React from "react";
+import GdButton from "./GdButton";
+import "../css/gd-home.scss";
+import { AppContext } from "../App";
 
 export default function GdHome() {
   return (
-    <div className='gd-home'>
-        <div className="title">Geometry Dash</div>
-        <div className="btns-container">
-            <GdButton impusleBg={true}>Start !</GdButton>
-            <GdButton>Leaderboard</GdButton>
-            <GdButton>Settings</GdButton>
-        </div>
-    </div>
-  )
+    <AppContext.Consumer>
+      {({ appState, setAppState }) => (
+        <section className="gd-home">
+          <div className="title">Geometry Dash</div>
+          <div className="btns-container">
+            <GdButton
+              impulseBg={true}
+              onClick={() => {
+                setAppState({...appState, in: 'select-map'});
+              }}
+            >
+              Start !
+            </GdButton>
+            <GdButton onClick={() => setAppState({...appState, in: 'home->settings'})}>
+              Settings
+            </GdButton>
+          </div>
+        </section>
+      )}
+    </AppContext.Consumer>
+  );
 }
