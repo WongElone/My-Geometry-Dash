@@ -15,31 +15,47 @@ export default function GdMapSelection() {
   const [mapSwiper, setMapSwiper] = useState(null);
   const mapsInfoList = [
     {
-      path: './map_1_path',
-      name: 'Map 1',
+      path: "./map_1_path",
+      name: "Map 1",
     },
     {
-      path: './map_2_path',
-      name: 'Map 2',
+      path: "./map_2_path",
+      name: "Map 2",
     },
     {
-      path: './map_3_path',
-      name: 'Map 3',
+      path: "./map_3_path",
+      name: "Map 3",
     },
     {
-      path: './map_4_path',
-      name: 'Map 4',
+      path: "./map_4_path",
+      name: "Map 4",
     },
-  ]
+  ];
 
-  function startBtnClickHandler({appState, setAppState}) {
+  function startBtnClickHandler({ appState, setAppState }) {
     const mapInfo = mapsInfoList[mapSwiper.activeIndex];
     const game = {
       map: {
         path: mapInfo.path,
-      }
-    }
-    setAppState({...appState, in: 'game', game})
+      },
+    };
+    setAppState({ ...appState, in: "game", game });
+  }
+
+  function hideStartBtn() {
+    setStartBtnProps({
+      ...startBtnProps,
+      hidden: true,
+      disabled: true,
+    });
+  }
+
+  function showStartBtn() {
+    setStartBtnProps({
+      ...startBtnProps,
+      hidden: false,
+      disabled: false,
+    });
   }
 
   return (
@@ -53,21 +69,11 @@ export default function GdMapSelection() {
               centeredSlides={true}
               slidesPerView={"auto"}
               className="map-listing"
-
-              onTransitionStart={() => {
-                setStartBtnProps({
-                  ...startBtnProps,
-                  hidden: true,
-                  disabled: true,
-                });
-              }}
-              onTransitionEnd={() => {
-                setStartBtnProps({
-                  ...startBtnProps,
-                  hidden: false,
-                  disabled: false,
-                });
-              }}
+              onTouchStart={hideStartBtn}
+              onTouchMove={hideStartBtn}
+              onTouchEnd={showStartBtn}
+              onTransitionStart={hideStartBtn}
+              onTransitionEnd={showStartBtn}
             >
               <SwiperSlide>
                 <GdMapSelectionCard>
@@ -128,7 +134,7 @@ export default function GdMapSelection() {
               disabled={startBtnProps.disabled}
               hidden={startBtnProps.hidden}
               impulseBg={true}
-              onClick={() => startBtnClickHandler({appState, setAppState})}
+              onClick={() => startBtnClickHandler({ appState, setAppState })}
             >
               Start !
             </GdButton>
