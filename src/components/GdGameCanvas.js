@@ -42,12 +42,13 @@ export default function GdGameCanvas() {
     const circle = new fabric.Circle({
       radius: 20,
       fill: "yellow",
-      left: 100,
-      top: 100,
+      left: 0,
+      top: 0,
       hoverCursor: "auto",
+      selectable: false,
     });
-    circle.selectable = false;
     gameCanvas.add(circle);
+    circle.set({left: 330, top: 100});
 
     window.requestAnimationFrame((timeStamp) => {
       animate({ timeStamp, gameCanvas });
@@ -77,25 +78,32 @@ export default function GdGameCanvas() {
       width: 320,
       backgroundColor: "green",
       selection: false,
+    //   objectCaching: false,
     });
   }
 
   function keyEventHandler(e) {
+    const item = gameCanvas.item(0);
     console.log(e.key);
+    // gameCanvas.item(0).dirty = true;
+    console.log(item);
 
+    let rerender = true;
     if (e.key === "w") {
-      gameCanvas.item(0).top -= 1;
-      gameCanvas.renderAll();
+      item.top -= 1;
     } else if (e.key === "a") {
-      gameCanvas.item(0).left -= 1;
-      gameCanvas.renderAll();
+      item.left -= 1;
     } else if (e.key === "s") {
-      gameCanvas.item(0).top += 1;
-      gameCanvas.renderAll();
+      item.top += 1;
     } else if (e.key === "d") {
-      gameCanvas.item(0).left += 1;
-      gameCanvas.renderAll();
+      item.left += 1;
+    } else {
+        rerender = false;
     }
+    if (rerender) gameCanvas.renderAll();
+    // if (item.dirty && item.left < 310 && item.top < 170) {
+    //     item.dirty = false;
+    // }
   }
 
   return (
