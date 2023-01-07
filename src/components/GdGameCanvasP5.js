@@ -2,14 +2,14 @@ import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 
-const BASE_WIDTH = 320;
-const BASE_HEIGHT = 180;
-const BLOCK_UNIT = 10; // block unit (i.e. pixels per unit block)
+const BASE_WIDTH = 640;
+const BASE_HEIGHT = 360;
+const BLOCK_UNIT = 20; // block unit (i.e. pixels per unit block)
 
 export default function GdGameCanvasP5() {
   const pCharRef = useRef({
     x: 0, // in ppu
-    y: 0, // in ppu
+    y: 240, // in ppu
     blockWidth: 1, // in block unit
     blockHeight: 1, // in block unit
   });
@@ -19,19 +19,44 @@ export default function GdGameCanvasP5() {
   const mapEntitiesRef = useRef([]);
   let mapEntities = mapEntitiesRef.current;
   useEffect(() => {
-    for (let i = 0; i < 5; i++) {
-      mapEntities.push({ // everything in ppu
-        type: "rect",
-        x: i * BLOCK_UNIT,
-        y: 15 * BLOCK_UNIT,
-        width: BLOCK_UNIT,
-        height: BLOCK_UNIT,
-      });
+    const skeleton = "----^--^".split("");
+    for (let i = 0; i < skeleton.length; i++) {
+      if (skeleton[i] === "-") {
+        mapEntities.push({
+          shape: "rect",
+          type: "safe",
+          // everything in ppu
+          x: i * BLOCK_UNIT,
+          y: 15 * BLOCK_UNIT,
+          width: BLOCK_UNIT,
+          height: BLOCK_UNIT,
+        });
+      } else if (skeleton[i] === "^") {
+        mapEntities.push({
+          shape: "rect",
+          type: "safe",
+          // everything in ppu
+          x: i * BLOCK_UNIT,
+          y: 15 * BLOCK_UNIT,
+          width: BLOCK_UNIT,
+          height: BLOCK_UNIT,
+        });
+        mapEntities.push({
+          shape: "tri",
+          type: "die",
+          // everything in ppu
+          x1: i * BLOCK_UNIT,
+          y1: 15 * BLOCK_UNIT,
+          x2: (i + 1) * BLOCK_UNIT,
+          y2: 15 * BLOCK_UNIT,
+          x3: (i + 0.5) * BLOCK_UNIT,
+          y3: (15 - 1) * BLOCK_UNIT,
+        });
+      }
     }
   }, []);
   // end of map entities init
 
-  let skeleton = "----".split("");
   let neighbors;
 
   let ppu = 1; // pixels per unit
@@ -56,7 +81,7 @@ export default function GdGameCanvasP5() {
     fitCanvas(p5);
 
     //
-    
+
     //
 
     p5.background("#555");
@@ -68,24 +93,53 @@ export default function GdGameCanvasP5() {
     p5.fill("#fff");
     for (let i = 0; i < mapEntities.length; i++) {
       const entity = mapEntities[i];
-      p5.rect(entity.x * ppu, entity.y * ppu, entity.width * ppu, entity.height * ppu);
-      neighbors.push({ // everything in exact pixels
-        type: "rect",
-        x: entity.x * ppu,
-        y: entity.y * ppu,
-        width: entity.width * ppu,
-        height: entity.height * ppu,
-      });
+      if (entity.shape === "rect") {
+        p5.rect(
+          entity.x * ppu,
+          entity.y * ppu,
+          entity.width * ppu,
+          entity.height * ppu
+        );
+        neighbors.push({
+          shape: entity.shape,
+          type: entity.type,
+          // everything in exact pixels
+          x: entity.x * ppu,
+          y: entity.y * ppu,
+          width: entity.width * ppu,
+          height: entity.height * ppu,
+        });
+      } else if (entity.shape === "tri") {
+        p5.triangle(
+          entity.x1 * ppu,
+          entity.y1 * ppu,
+          entity.x2 * ppu,
+          entity.y2 * ppu,
+          entity.x3 * ppu,
+          entity.y3 * ppu
+        );
+        neighbors.push({
+          shape: entity.shape,
+          type: entity.type,
+          // everything in exact pixels
+          x1: entity.x1 * ppu,
+          y1: entity.y1 * ppu,
+          x2: entity.x2 * ppu,
+          y2: entity.y2 * ppu,
+          x3: entity.x3 * ppu,
+          y3: entity.y3 * ppu,
+        });
+      }
     }
     // end of map
 
     // detect collision
-    const collided = detectCollision({p5, pChar, neighbors});
+    const result = detectCollision({ p5, pChar, neighbors });
     // end of detect collision
 
     // player character drawing
     p5.strokeWeight(0);
-    if (collided) {
+    if (result.die) {
       p5.fill("red");
     } else {
       p5.fill("#fff");
@@ -103,38 +157,59 @@ export default function GdGameCanvasP5() {
       console.log("w");
       const displaceX = 0;
       const displaceY = -1;
-      const willCollide = predictCollision({p5, pChar, neighbors, displaceX, displaceY});
+      const willCollide = predictCollision({
+        p5,
+        pChar,
+        neighbors,
+        displaceX,
+        displaceY,
+      });
       if (!willCollide) pChar.y += displaceY;
-
     } else if (p5.keyIsDown(p5.DOWN_ARROW)) {
       console.log("s");
       const displaceX = 0;
       const displaceY = 1;
-      const willCollide = predictCollision({p5, pChar, neighbors, displaceX, displaceY});
+      const willCollide = predictCollision({
+        p5,
+        pChar,
+        neighbors,
+        displaceX,
+        displaceY,
+      });
       if (!willCollide) pChar.y += displaceY;
-
     } else if (p5.keyIsDown(p5.LEFT_ARROW)) {
       console.log("a");
       const displaceX = -1;
       const displaceY = 0;
-      const willCollide = predictCollision({p5, pChar, neighbors, displaceX, displaceY});
+      const willCollide = predictCollision({
+        p5,
+        pChar,
+        neighbors,
+        displaceX,
+        displaceY,
+      });
       if (!willCollide) pChar.x += displaceX;
-
     } else if (p5.keyIsDown(p5.RIGHT_ARROW)) {
       console.log("s");
       const displaceX = 1;
       const displaceY = 0;
-      const willCollide = predictCollision({p5, pChar, neighbors, displaceX, displaceY});
+      const willCollide = predictCollision({
+        p5,
+        pChar,
+        neighbors,
+        displaceX,
+        displaceY,
+      });
       if (!willCollide) pChar.x += displaceX;
     }
     // end of key event handling
   };
 
-  function predictCollision({p5, pChar, neighbors, displaceX, displaceY}) {
+  function predictCollision({ p5, pChar, neighbors, displaceX, displaceY }) {
     let willCollide = false;
     for (let i in neighbors) {
       const entity = neighbors[i];
-      if (entity.type === "rect") {
+      if (entity.shape === "rect") {
         willCollide = p5.collideRectRect(
           (pChar.x + displaceX) * ppu,
           (pChar.y + displaceY) * ppu,
@@ -143,7 +218,7 @@ export default function GdGameCanvasP5() {
           entity.x,
           entity.y,
           entity.width,
-          entity.height,
+          entity.height
         );
 
         if (willCollide) {
@@ -154,11 +229,12 @@ export default function GdGameCanvasP5() {
     return willCollide;
   }
 
-  function detectCollision({p5, pChar, neighbors}) {
-    let collided = false;
+  function detectCollision({ p5, pChar, neighbors }) {
+    const result = {die: false, collisions : []};
     for (let i in neighbors) {
+      let collided = false;
       const entity = neighbors[i];
-      if (entity.type === "rect") {
+      if (entity.shape === "rect") {
         collided = p5.collideRectRect(
           pChar.x * ppu,
           pChar.y * ppu,
@@ -167,15 +243,30 @@ export default function GdGameCanvasP5() {
           entity.x,
           entity.y,
           entity.width,
-          entity.height,
+          entity.height
         );
+      } else if (entity.shape === "tri") {
+        collided = p5.collideRectPoly(
+          pChar.x * ppu,
+          pChar.y * ppu,
+          pChar.blockWidth * ppb,
+          pChar.blockHeight * ppb,
+          [
+            p5.createVector(entity.x1, entity.y1),
+            p5.createVector(entity.x2, entity.y2),
+            p5.createVector(entity.x3, entity.y3)
+          ]
+        );
+      }
 
-        if (collided) {
-          break;
+      if (collided) {
+        if (entity.type === 'die') {
+          result.die = true;
         }
+        result.collisions.push({entity});
       }
     }
-    return collided;
+    return result;
   }
 
   const windowResized = (p5) => {
