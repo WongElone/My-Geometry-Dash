@@ -48,6 +48,7 @@ function App() {
 
   return (
     <AppContext.Provider value={{ appState, setAppState }}>
+      {/* <script src="./plugins/p5.min.js"></script> */}
       <div className="gd-app">
         <h1 style={{ display: "none" }}>Geometry Dash</h1>
         {(() => {

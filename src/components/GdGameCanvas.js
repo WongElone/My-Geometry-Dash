@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { fabric } from "fabric";
-import GdButton from "./GdButton";
 import { AppContext } from "../App";
 
 export default function GdGameCanvas() {
@@ -36,9 +35,11 @@ export default function GdGameCanvas() {
     // end of scaling outer container
   }, [appState.window.vw, appState.window.vh, gameCanvas]);
 
-  // test circle
+  // init game canvas
   useEffect(() => {
     if (!gameCanvas) return;
+
+    // init game objects
     const circle = new fabric.Circle({
       radius: 20,
       fill: "yellow",
@@ -49,10 +50,53 @@ export default function GdGameCanvas() {
     });
     gameCanvas.add(circle);
     circle.set({left: 330, top: 100});
+    
+    let skeleton = '---- ---/';
+    skeleton = skeleton.split("");
+    for (let i = 0; i < skeleton.length; i++) {
+        console.log(skeleton[i]);
+        let newItem = null;
 
+        if (skeleton[i] === ' ') {
+            
+        } else if (skeleton[i] === '-') {
+            newItem = new fabric.Rect({
+                left: 10 * i,
+                top: 50,
+                width: 10,
+                height: 10,
+                fill: "yellow",
+                // stroke: "white",
+                // strokeWidth: 0.1,
+                hoverCursor: "auto",
+                selectable: false,
+            });
+        } else if (skeleton[i] === '/') {
+            newItem = new fabric.Rect({
+                left: 10 * i,
+                top: 50,
+                width: 10,
+                height: 10,
+                fill: "yellow",
+                // stroke: "white",
+                // strokeWidth: 0.1,
+                hoverCursor: "auto",
+                selectable: false,
+            });
+        }
+
+        if (newItem) {
+            gameCanvas.add(newItem);
+            // newItem.set({left: 10 * i});
+        }
+    }
+    // end of init game objects
+
+    // execute game loop
     window.requestAnimationFrame((timeStamp) => {
       animate({ timeStamp, gameCanvas });
     });
+    // end of execute game loop
   }, [gameCanvas]);
 
   // game loop
@@ -78,7 +122,6 @@ export default function GdGameCanvas() {
       width: 320,
       backgroundColor: "green",
       selection: false,
-    //   objectCaching: false,
     });
   }
 
@@ -101,9 +144,6 @@ export default function GdGameCanvas() {
         rerender = false;
     }
     if (rerender) gameCanvas.renderAll();
-    // if (item.dirty && item.left < 310 && item.top < 170) {
-    //     item.dirty = false;
-    // }
   }
 
   return (
