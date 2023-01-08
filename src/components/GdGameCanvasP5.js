@@ -2,60 +2,19 @@ import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 
-const BASE_WIDTH = 640;
-const BASE_HEIGHT = 360;
-const BLOCK_UNIT = 20; // block unit (i.e. pixels per unit block)
+export default function GdGameCanvasP5(props) {
+  const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
 
-export default function GdGameCanvasP5() {
   const pCharRef = useRef({
-    x: 0, // in ppu
-    y: 240, // in ppu
-    blockWidth: 1, // in block unit
-    blockHeight: 1, // in block unit
+    x: pCharData.x, // in ppu
+    y: pCharData.y, // in ppu
+    blockWidth: pCharData.blockWidth, // in block unit
+    blockHeight: pCharData.blockHeight, // in block unit
   });
   let pChar = pCharRef.current;
 
   // map entities init
-  const mapEntitiesRef = useRef([]);
-  let mapEntities = mapEntitiesRef.current;
-  useEffect(() => {
-    const skeleton = "----^--^".split("");
-    for (let i = 0; i < skeleton.length; i++) {
-      if (skeleton[i] === "-") {
-        mapEntities.push({
-          shape: "rect",
-          type: "safe",
-          // everything in ppu
-          x: i * BLOCK_UNIT,
-          y: 15 * BLOCK_UNIT,
-          width: BLOCK_UNIT,
-          height: BLOCK_UNIT,
-        });
-      } else if (skeleton[i] === "^") {
-        mapEntities.push({
-          shape: "rect",
-          type: "safe",
-          // everything in ppu
-          x: i * BLOCK_UNIT,
-          y: 15 * BLOCK_UNIT,
-          width: BLOCK_UNIT,
-          height: BLOCK_UNIT,
-        });
-        mapEntities.push({
-          shape: "tri",
-          type: "die",
-          // everything in ppu
-          x1: i * BLOCK_UNIT,
-          y1: 15 * BLOCK_UNIT,
-          x2: (i + 1) * BLOCK_UNIT,
-          y2: 15 * BLOCK_UNIT,
-          x3: (i + 0.5) * BLOCK_UNIT,
-          y3: (15 - 1) * BLOCK_UNIT,
-        });
-      }
-    }
-  }, []);
-  // end of map entities init
+  let mapEntities = mapData.entities;
 
   let neighbors;
 
