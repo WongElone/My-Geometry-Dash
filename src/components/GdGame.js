@@ -38,15 +38,6 @@ export default function GdGame() {
 
     const mapEntities = [];
 
-    const levels = rawMapEntities.split("!");
-
-    let startLevelIndex = -1;
-    levels.forEach((level, index) => {
-      if (level.trim()[0] === "s") {
-        startLevelIndex = index;
-      }
-    });
-
     // add buffer blocks before starting point
     for (let i = 0; i < BUFFER_BLOCKS; i++) {
       mapEntities.push({
@@ -61,8 +52,20 @@ export default function GdGame() {
     }
     // end of add buffer blocks before starting point
 
+    // add map entities
+    const levels = rawMapEntities.split(";");
+
+    let startLevelIndex = -1;
     levels.forEach((level, index) => {
-      let oY = START_POINT_Y + (index - startLevelIndex) * 3.2 * BLOCK_UNIT; // y displacement from canvas origin in ppu
+      if (level.trim()[0] === "s") {
+        startLevelIndex = index;
+      }
+    });
+    
+    // TODO: reduce height of rect
+    // TODO: handle upward slope and downward slope
+    levels.forEach((level, index) => {
+      let oY = START_POINT_Y + (index - startLevelIndex) * 1 * BLOCK_UNIT; // y displacement from canvas origin in ppu
       let oX = START_POINT_X; // x displacement from canvas origin in ppu
       for (let i in level) {
         const entity = level[i];
@@ -79,57 +82,18 @@ export default function GdGame() {
           });
         } else if (entity === "^") {
           mapEntities.push({
-            shape: "rect",
-            type: "safe",
-            // everything in ppu
-            x: oX,
-            y: oY,
-            width: BLOCK_UNIT,
-            height: BLOCK_UNIT,
-          });
-          mapEntities.push({
             shape: "tri",
             type: "die",
             // everything in ppu
             x1: oX,
-            y1: oY,
+            y1: oY + BLOCK_UNIT,
             x2: oX + BLOCK_UNIT,
-            y2: oY,
+            y2: oY + BLOCK_UNIT,
             x3: oX + 0.5 * BLOCK_UNIT,
-            y3: oY - 0.8 * BLOCK_UNIT,
+            y3: oY + 0.2 * BLOCK_UNIT,
           });
         } else if (entity === "v") {
           mapEntities.push({
-            shape: "rect",
-            type: "safe",
-            // everything in ppu
-            x: oX,
-            y: oY,
-            width: BLOCK_UNIT,
-            height: BLOCK_UNIT,
-          });
-          mapEntities.push({
-            shape: "tri",
-            type: "die",
-            // everything in ppu
-            x1: oX,
-            y1: oY + BLOCK_UNIT,
-            x2: oX + BLOCK_UNIT,
-            y2: oY + BLOCK_UNIT,
-            x3: oX + 0.5 * BLOCK_UNIT,
-            y3: oY + 1.8 * BLOCK_UNIT,
-          });
-        } else if (entity === "+") {
-          mapEntities.push({
-            shape: "rect",
-            type: "safe",
-            // everything in ppu
-            x: oX,
-            y: oY,
-            width: BLOCK_UNIT,
-            height: BLOCK_UNIT,
-          });
-          mapEntities.push({
             shape: "tri",
             type: "die",
             // everything in ppu
@@ -138,18 +102,7 @@ export default function GdGame() {
             x2: oX + BLOCK_UNIT,
             y2: oY,
             x3: oX + 0.5 * BLOCK_UNIT,
-            y3: oY - 0.8 * BLOCK_UNIT,
-          });
-          mapEntities.push({
-            shape: "tri",
-            type: "die",
-            // everything in ppu
-            x1: oX,
-            y1: oY + BLOCK_UNIT,
-            x2: oX + BLOCK_UNIT,
-            y2: oY + BLOCK_UNIT,
-            x3: oX + 0.5 * BLOCK_UNIT,
-            y3: oY + 1.8 * BLOCK_UNIT,
+            y3: oY + 0.8 * BLOCK_UNIT,
           });
         } else {
           continue;
@@ -157,6 +110,7 @@ export default function GdGame() {
         oX += BLOCK_UNIT;
       }
     });
+    // end of add map entities
 
     console.log("Map Entities", mapEntities);
     setMapData({ ...mapData, entities: mapEntities });

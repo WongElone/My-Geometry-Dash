@@ -16,6 +16,8 @@ export default function GdGameCanvasP5(props) {
   // map entities init
   let mapEntities = mapData.entities;
 
+  // TODO: filter entities that are in range of canvas
+
   let neighbors;
 
   let ppu = 1; // pixels per unit
@@ -45,6 +47,7 @@ export default function GdGameCanvasP5(props) {
 
     p5.background("#555");
 
+    // TODO: only render map entities that are in range of canvas
     // map
     neighbors = [];
     p5.strokeWeight(1);
@@ -101,7 +104,7 @@ export default function GdGameCanvasP5(props) {
     if (result.die) {
       p5.fill("red");
     } else {
-      p5.fill("#fff");
+      p5.fill("green");
     }
     p5.rect(
       pChar.x * ppu,
