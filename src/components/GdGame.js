@@ -16,8 +16,8 @@ export default function GdGame() {
   const pCharData = {
     x: START_POINT_X, // ppu
     y: START_POINT_Y - 0.9 * BLOCK_UNIT, // ppu
-    blockWidth: 0.85, // block unit
-    blockHeight: 0.85, // block unit
+    blockWidth: 0.9, // block unit
+    blockHeight: 0.9, // block unit
   };
 
   const [isLoadingMap, setIsLoadingMap] = useState(true);

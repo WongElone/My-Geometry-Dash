@@ -1,17 +1,18 @@
 import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
+import PlayerCharState from "../customs/PlayerCharStates/PlayerCharState";
+import PlayerChar from "../customs/PlayerChar";
 
 export default function GdGameCanvasP5(props) {
   const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
 
-  const pCharRef = useRef({
+  const pChar = useRef(new PlayerChar({
     x: pCharData.x, // in ppu
     y: pCharData.y, // in ppu
-    blockWidth: pCharData.blockWidth, // in block unit
-    blockHeight: pCharData.blockHeight, // in block unit
-  });
-  let pChar = pCharRef.current;
+    rad: Math.PI / 4, // in rad
+    width: pCharData.blockWidth * BLOCK_UNIT, // in block unit
+  }));
 
   // map entities init
   let mapEntities = mapData.entities;
@@ -21,7 +22,6 @@ export default function GdGameCanvasP5(props) {
   let neighbors;
 
   let ppu = 1; // pixels per unit
-  let ppb = BLOCK_UNIT * ppu; // pixels per block
 
   const setup = (p5, canvasParentRef) => {
     // use parent to render the canvas in this ref
@@ -31,7 +31,6 @@ export default function GdGameCanvasP5(props) {
       canvasParentRef
     );
     p5Collide2dInit(p5);
-    console.log(p5.collideCircleCircle(0, 0, 6, 6, 6, 7));
   };
 
   const draw = (p5) => {
@@ -106,12 +105,14 @@ export default function GdGameCanvasP5(props) {
     } else {
       p5.fill("green");
     }
-    p5.rect(
-      pChar.x * ppu,
-      pChar.y * ppu,
-      pChar.blockWidth * ppb,
-      pChar.blockHeight * ppb
-    );
+    // p5.rect(
+    //   pChar.current.x * ppu,
+    //   pChar.current.y * ppu,
+    //   pChar.current.blockWidth * ppb,
+    //   pChar.current.blockHeight * ppb
+    // );
+    // p5.quad(pChar.current.x, pChar.current.y, 86, 20, 69, 63, 30, 76);
+    p5.quad(...pChar.current.getVerticesPpu().map(p => p * ppu));
     // end of player character drawing
 
     // key event handling
@@ -126,7 +127,7 @@ export default function GdGameCanvasP5(props) {
         displaceX,
         displaceY,
       });
-      if (!willCollide) pChar.y += displaceY;
+      if (!willCollide) pChar.current.y += displaceY;
     } else if (p5.keyIsDown(p5.DOWN_ARROW)) {
       console.log("s");
       const displaceX = 0;
@@ -138,7 +139,7 @@ export default function GdGameCanvasP5(props) {
         displaceX,
         displaceY,
       });
-      if (!willCollide) pChar.y += displaceY;
+      if (!willCollide) pChar.current.y += displaceY;
     } else if (p5.keyIsDown(p5.LEFT_ARROW)) {
       console.log("a");
       const displaceX = -1;
@@ -150,7 +151,7 @@ export default function GdGameCanvasP5(props) {
         displaceX,
         displaceY,
       });
-      if (!willCollide) pChar.x += displaceX;
+      if (!willCollide) pChar.current.x += displaceX;
     } else if (p5.keyIsDown(p5.RIGHT_ARROW)) {
       console.log("s");
       const displaceX = 1;
@@ -162,7 +163,7 @@ export default function GdGameCanvasP5(props) {
         displaceX,
         displaceY,
       });
-      if (!willCollide) pChar.x += displaceX;
+      if (!willCollide) pChar.current.x += displaceX;
     }
     // end of key event handling
   };
@@ -171,16 +172,29 @@ export default function GdGameCanvasP5(props) {
     let willCollide = false;
     for (let i in neighbors) {
       const entity = neighbors[i];
+      const pCharVertices = pChar.current.getVerticesPpu(displaceX, displaceY);
       if (entity.shape === "rect") {
-        willCollide = p5.collideRectRect(
-          (pChar.x + displaceX) * ppu,
-          (pChar.y + displaceY) * ppu,
-          pChar.blockWidth * ppb,
-          pChar.blockHeight * ppb,
+        // willCollide = p5.collideRectRect(
+        //   (pChar.current.x + displaceX) * ppu,
+        //   (pChar.current.y + displaceY) * ppu,
+        //   pChar.current.width * ppu,
+        //   pChar.current.width * ppu,
+        //   entity.x,
+        //   entity.y,
+        //   entity.width,
+        //   entity.height
+        // );
+        willCollide = p5.collideRectPoly(
           entity.x,
           entity.y,
           entity.width,
-          entity.height
+          entity.height,
+          [
+            p5.createVector(pCharVertices[0] * ppu, pCharVertices[1] * ppu),
+            p5.createVector(pCharVertices[2] * ppu, pCharVertices[3] * ppu),
+            p5.createVector(pCharVertices[4] * ppu, pCharVertices[5] * ppu),
+            p5.createVector(pCharVertices[6] * ppu, pCharVertices[7] * ppu),
+          ]
         );
 
         if (willCollide) {
@@ -193,31 +207,37 @@ export default function GdGameCanvasP5(props) {
 
   function detectCollision({ p5, pChar, neighbors }) {
     const result = {die: false, collisions : []};
+    const pCharVertices = pChar.current.getVerticesPpu();
     for (let i in neighbors) {
       let collided = false;
       const entity = neighbors[i];
       if (entity.shape === "rect") {
-        collided = p5.collideRectRect(
-          pChar.x * ppu,
-          pChar.y * ppu,
-          pChar.blockWidth * ppb,
-          pChar.blockHeight * ppb,
+        collided = p5.collideRectPoly(
           entity.x,
           entity.y,
           entity.width,
-          entity.height
+          entity.height,
+          [
+            p5.createVector(pCharVertices[0] * ppu, pCharVertices[1] * ppu),
+            p5.createVector(pCharVertices[2] * ppu, pCharVertices[3] * ppu),
+            p5.createVector(pCharVertices[4] * ppu, pCharVertices[5] * ppu),
+            p5.createVector(pCharVertices[6] * ppu, pCharVertices[7] * ppu),
+          ]
         );
       } else if (entity.shape === "tri") {
-        collided = p5.collideRectPoly(
-          pChar.x * ppu,
-          pChar.y * ppu,
-          pChar.blockWidth * ppb,
-          pChar.blockHeight * ppb,
+        collided = p5.collidePolyPoly(
+          [
+            p5.createVector(pCharVertices[0] * ppu, pCharVertices[1] * ppu),
+            p5.createVector(pCharVertices[2] * ppu, pCharVertices[3] * ppu),
+            p5.createVector(pCharVertices[4] * ppu, pCharVertices[5] * ppu),
+            p5.createVector(pCharVertices[6] * ppu, pCharVertices[7] * ppu),
+          ],
           [
             p5.createVector(entity.x1, entity.y1),
             p5.createVector(entity.x2, entity.y2),
-            p5.createVector(entity.x3, entity.y3)
-          ]
+            p5.createVector(entity.x3, entity.y3),
+          ],
+          true
         );
       }
 
@@ -247,7 +267,6 @@ export default function GdGameCanvasP5(props) {
       (window.innerWidth - 60) / BASE_WIDTH,
       (window.innerHeight - 200) / BASE_HEIGHT
     );
-    ppb = BLOCK_UNIT * ppu;
   }
 
   return (
