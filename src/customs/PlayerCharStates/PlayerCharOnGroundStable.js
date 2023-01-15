@@ -1,6 +1,6 @@
 import PlayerCharState from "./PlayerCharState";
 
-export default class PlayerCharTouchGround extends PlayerCharState {
+export default class PlayerCharOnGroundStable extends PlayerCharState {
     constructor(pChar) {
         super(pChar);
         this.accelX = 0;

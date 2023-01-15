@@ -7,15 +7,15 @@ import "../css/gd-game.scss";
 import axios from "axios";
 
 export default function GdGame() {
-  const BASE_WIDTH = 640; // ppu
-  const BASE_HEIGHT = 360; // ppu
-  const BLOCK_UNIT = 20; // block unit (i.e. number of ppu per block)
+  const BASE_WIDTH = 640 * 3; // ppu
+  const BASE_HEIGHT = 360 * 3; // ppu
+  const BLOCK_UNIT = 20 * 3; // block unit (i.e. number of ppu per block)
   const BUFFER_BLOCKS = 5; // block unit
   const START_POINT_X = BUFFER_BLOCKS * BLOCK_UNIT; // ppu
   const START_POINT_Y = BASE_HEIGHT - 3.2 * BLOCK_UNIT; // ppu
   const pCharData = {
-    x: START_POINT_X, // ppu
-    y: START_POINT_Y - 0.9 * BLOCK_UNIT, // ppu
+    x: START_POINT_X - 0.5 * BLOCK_UNIT, // ppu
+    y: START_POINT_Y - 0.45 * BLOCK_UNIT - 1, // ppu
     blockWidth: 0.9, // block unit
     blockHeight: 0.9, // block unit
   };
@@ -43,6 +43,7 @@ export default function GdGame() {
       mapEntities.push({
         shape: "rect",
         type: "safe",
+        penetrable: false,
         // everything in ppu
         x: START_POINT_X - (BUFFER_BLOCKS - i) * BLOCK_UNIT,
         y: START_POINT_Y,
@@ -74,6 +75,7 @@ export default function GdGame() {
           mapEntities.push({
             shape: "rect",
             type: "safe",
+            penetrable: false,
             // everything in ppu
             x: oX,
             y: oY,
@@ -84,6 +86,7 @@ export default function GdGame() {
           mapEntities.push({
             shape: "tri",
             type: "die",
+            penetrable: true,
             // everything in ppu
             x1: oX,
             y1: oY + BLOCK_UNIT,
@@ -96,6 +99,7 @@ export default function GdGame() {
           mapEntities.push({
             shape: "tri",
             type: "die",
+            penetrable: true,
             // everything in ppu
             x1: oX,
             y1: oY,
