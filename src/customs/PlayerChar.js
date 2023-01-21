@@ -3,6 +3,8 @@ import PlayerCharDie from "./PlayerCharStates/PlayerCharDie";
 import PlayerCharOnGroundStable from "./PlayerCharStates/PlayerCharOnGroundStable";
 import PlayerCharOnGroundUnstable from "./PlayerCharStates/PlayerCharOnGroundUnstable";
 import PlayerCharFallFromGround from "./PlayerCharStates/PlayerCharFallFromGround";
+import PlayerCharFreeFall from "./PlayerCharStates/PlayerCharFreeFall";
+import PlayerCharState from "./PlayerCharStates/PlayerCharState";
 
 function getEntityCenter(entity) {
   if (entity.shape === "rect") {
@@ -29,13 +31,21 @@ function getVerticesAboveYLevel(vertices, y) {
 }
 
 export default class PlayerChar {
-  constructor({ x, y, rad, width }) {
+  constructor({ x, y, rad, width, vX, vY, vRad, aX, aY, aRad }) {
+    // vX, vY, vRad, aX, aY, aRad are optional
     this.x = x; // in ppu
     this.y = y; // in ppu
     this.rad = rad; // rotation about center, in radian, when 0 the block is parallel to horizontal axis
+    this.vX = vX || 0; // horizontal velocity (right positive) in ppu per sec
+    this.vY = vY || 0; // vertical velocity (downward postive) in ppu per sec
+    this.vRad = vRad || 0; // angular velocity (clockwise positive) in ppu per sec
+    this.aX = aX || 0; // horizontal acceleration (right positive) in ppu per sec square
+    this.aY = aY || 0; // vertical acceleration (downward postive) in ppu per sec squre
+    this.aRad = aRad || 0; // angular velocity (clockwise positive) in ppu per sec squre
     this.width = width; // in ppu
     this.contactThreshold = 1; // threshold for determining pChar contacting entites, in ppu
     this.allStates = Object.freeze({
+      FreeFall: PlayerCharFreeFall,
       Die: PlayerCharDie,
       OnGroundStabe: PlayerCharOnGroundStable,
       OnGroundUnstable: PlayerCharOnGroundUnstable,
@@ -62,11 +72,10 @@ export default class PlayerChar {
     ];
   }
 
-  getPlayerCharStatesSet({ ppu, p5, neighbors }) {
+  getPlayerCharStatesSet({ p5, neighbors }) {
     const nonPenetrableNeigbors = neighbors.filter((n) => !n.penetrable);
 
     const nonPenetrableNeigborsContactResult = detectContact({
-      ppu,
       p5,
       pChar: this,
       entities: nonPenetrableNeigbors,
@@ -76,7 +85,6 @@ export default class PlayerChar {
     const penetrableNeigbors = neighbors.filter(n => n.penetrable);
     
     const penetrableNeigborsContactResult = detectContact({
-      ppu,
       p5,
       pChar: this,
       entities: penetrableNeigbors,
@@ -84,6 +92,11 @@ export default class PlayerChar {
     });
 
     const states = new Set();
+
+    if (nonPenetrableNeigborsContactResult.contacts.length === 0 && penetrableNeigborsContactResult.contacts.length === 0) {
+      states.add(this.allStates.FreeFall);
+      return states;
+    }
     if (penetrableNeigborsContactResult.contacts.length) {
       for (let contact of penetrableNeigborsContactResult.contacts) {
         const entity = contact.entity;
@@ -95,8 +108,6 @@ export default class PlayerChar {
     if (nonPenetrableNeigborsContactResult.contacts.length) {
       for (let contact of nonPenetrableNeigborsContactResult.contacts) {
         const entity = contact.entity;
-        console.log(entity);
-        console.log(getVerticesAboveYLevel(this.getVerticesPpu(), entity.y));
         if (
           entity.shape === "rect" &&
           entity.y + entity.height < this.y &&
@@ -142,4 +153,33 @@ export default class PlayerChar {
 
     return states;
   }
+
+  getPlayerCharState({ p5, neighbors }) {
+    const states = this.getPlayerCharStatesSet({ p5, neighbors });
+
+    if (states.size === 0) {
+      // return PlayerCharState;
+      console.error("empty state set");
+      throw new Error("empty state set");
+    }
+
+    if (states.has(this.allStates.Die)) {
+      return this.allStates.Die;
+    } else if (states.has(this.allStates.OnGroundStabe)) {
+      return this.allStates.OnGroundStabe;
+    } else if (states.has(this.allStates.OnGroundUnstable)) {
+      return this.allStates.OnGroundUnstable;
+    } else if (states.has(this.allStates.FallFromGround)) {
+      return this.allStates.FallFromGround;
+    } else if (states.has(this.allStates.FreeFall)) {
+      return this.allStates.FreeFall;
+    } else {
+      console.error("unknown handled state");
+      throw new Error("unknown handled state");
+    }
+  }
+
+  // collisionReport() {
+  //   return detectCollision({ p5, pChar, })
+  // }
 }

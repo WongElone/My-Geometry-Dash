@@ -2,16 +2,23 @@ import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
-import { predictCollision, detectCollision } from "../customs/CollisionDetection";
+import { detectCollision } from "../customs/CollisionDetection";
+import PlayerCharState from "../customs/PlayerCharStates/PlayerCharState";
+import PlayerCharOnGroundStable from "../customs/PlayerCharStates/PlayerCharOnGroundStable";
 
 export default function GdGameCanvasP5(props) {
   const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
+  const FRAME_RATE = 60; // frames per second
+  const FRAME_DURATION = 1 / FRAME_RATE; // second
 
   const pCharRef = useRef(new PlayerChar({
     x: pCharData.x, // in ppu
     y: pCharData.y, // in ppu
     rad: 0, // in rad
     width: pCharData.blockWidth * BLOCK_UNIT, // in block unit
+    // optional parameters
+    vX: 300,
+    // end of optional parameters
   }));
 
   // map entities init
@@ -26,6 +33,7 @@ export default function GdGameCanvasP5(props) {
   const setup = (p5, canvasParentRef) => {
     // use parent to render the canvas in this ref
     // (without that p5 will render the canvas outside of your component)
+    p5.frameRate(FRAME_RATE);
     updatePpu();
     p5.createCanvas(BASE_WIDTH * ppu, BASE_HEIGHT * ppu).parent(
       canvasParentRef
@@ -37,6 +45,7 @@ export default function GdGameCanvasP5(props) {
     // NOTE: Do not use setState in the draw function or in functions that are executed
     // in the draw function...
     // please use normal variables or class properties for these purposes
+
     updatePpu();
     fitCanvas(p5);
 
@@ -76,27 +85,55 @@ export default function GdGameCanvasP5(props) {
     }
     // end of map
 
-    // detect collision
-    // const result = detectCollision({ ppu, p5, pChar: pCharRef.current, neighbors });
-    const result = {};
-    // console.log(pCharRef.current);
-    // end of detect collision
+    // determine state
+    const PCharState = pCharRef.current.getPlayerCharState({p5, neighbors});
+    const pCharState = new PCharState(pCharRef.current);
+    // end of determine state
+
+    // move
+    if (p5.keyIsDown(32)) { // spacebar
+      pCharState.jump();
+    }
+
+    const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION);
+    while (true) {
+      // check collision with non penetrable entities
+      const result = detectCollision({ p5, pChar: nextPChar, entities: neighbors});
+      // if no collision with non penetrable entities, set penetration to false
+      if (!result.collisions.length) {
+        break;
+      }
+
+      // if collided to any entity of die type, then no need to adjust position of pChar
+      let breaker = false;
+      for (let collision of result.collisions) {
+        if (collision.entity.type === "die") breaker = true;
+      }
+      if (breaker) break;
+
+      // adjust x, y, rad
+      nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x
+      nextPChar.y -= Math.sign(nextPChar.vY) * nextPChar.contactThreshold; // reduce y
+      nextPChar.rad -= Math.sign(nextPChar.vRad) * Math.PI / 180; // reduce one degree
+    }
+
+    pCharRef.current = nextPChar;
+    // end of move
 
     // player character drawing
     p5.strokeWeight(0);
-    if (result.die) {
+    if (pCharState.dead()) {
       p5.fill("red");
     } else {
       p5.fill("green");
     }
     p5.quad(...pCharRef.current.getVerticesPpu().map(p => p * ppu));
     // end of player character drawing
-    
+
     // key event handling
     if (p5.keyIsDown(83)) {
-      // console.log(neighbors);
-      console.log(pCharRef.current.getVerticesPpu());
-      console.log(pCharRef.current.getPlayerCharStatesSet({ ppu, p5, neighbors }));
+      // console.log(pCharState);
+      console.log(pCharRef.current.getPlayerCharStatesSet({ p5, neighbors }));
     }
     if (p5.keyIsDown(p5.UP_ARROW)) {
       console.log("w");
