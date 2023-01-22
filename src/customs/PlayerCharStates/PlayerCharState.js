@@ -4,18 +4,19 @@ export default class PlayerCharState {
   }
 
   jump() {
-    return this;
-  }
-
-  rotate() {
-    return this;
+    // this method is called when spacebar is pressed
+    // update pChar properties
   }
 
   getNextFramePChar(FRAME_DURATION) { // frame duration = time taken for one frame
-    this.pChar.x += this.pChar.vX * FRAME_DURATION;
-    this.pChar.y += this.pChar.vY * FRAME_DURATION;
-    this.pChar.rad += this.pChar.vRad * FRAME_DURATION;
-    return this.pChar;
+    const nextPChar = this.pChar;
+    // update position of nextPChar
+    return nextPChar;
+  }
+
+  adjustNextFramePChar({ p5, nextPChar, neighbors }) {
+    // adjust position of nextPChar
+    return nextPChar;
   }
 
   dead() {

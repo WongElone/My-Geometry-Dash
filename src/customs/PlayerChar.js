@@ -4,7 +4,6 @@ import PlayerCharOnGroundStable from "./PlayerCharStates/PlayerCharOnGroundStabl
 import PlayerCharOnGroundUnstable from "./PlayerCharStates/PlayerCharOnGroundUnstable";
 import PlayerCharFallFromGround from "./PlayerCharStates/PlayerCharFallFromGround";
 import PlayerCharFreeFall from "./PlayerCharStates/PlayerCharFreeFall";
-import PlayerCharState from "./PlayerCharStates/PlayerCharState";
 
 function getEntityCenter(entity) {
   if (entity.shape === "rect") {
@@ -53,8 +52,13 @@ export default class PlayerChar {
     });
   }
 
-  isParallel() { // return boolean of whether the block is parallel to horizontal axis
-    return (this.rad % (Math.PI * 0.5) < 0.01 || this.rad % (Math.PI * 0.5) - (Math.PI * 0.5) < 0.01);
+  isParallel() {
+    // return boolean of whether the block is parallel to horizontal axis
+    return (
+      (this.rad % (Math.PI * 0.5) >= 0 && this.rad % (Math.PI * 0.5) < 0.01) ||
+      ((this.rad % (Math.PI * 0.5)) - Math.PI * 0.5 >= 0 &&
+        (this.rad % (Math.PI * 0.5)) - Math.PI * 0.5 < 0.01)
+    );
   }
 
   getVerticesPpu(displaceX = 0, displaceY = 0) {
@@ -75,25 +79,18 @@ export default class PlayerChar {
   getPlayerCharStatesSet({ p5, neighbors }) {
     const nonPenetrableNeigbors = neighbors.filter((n) => !n.penetrable);
 
-    const nonPenetrableNeigborsContactResult = detectContact({
-      p5,
-      pChar: this,
-      entities: nonPenetrableNeigbors,
-      contactThreshold: this.contactThreshold,
-    });
+    const nonPenetrableNeigborsContactResult = this.getContactReport({ p5, entities: nonPenetrableNeigbors });
 
-    const penetrableNeigbors = neighbors.filter(n => n.penetrable);
-    
-    const penetrableNeigborsContactResult = detectContact({
-      p5,
-      pChar: this,
-      entities: penetrableNeigbors,
-      contactThreshold: this.contactThreshold,
-    });
+    const penetrableNeigbors = neighbors.filter((n) => n.penetrable);
+
+    const penetrableNeigborsContactResult = this.getContactReport({ p5, entities: penetrableNeigbors });
 
     const states = new Set();
 
-    if (nonPenetrableNeigborsContactResult.contacts.length === 0 && penetrableNeigborsContactResult.contacts.length === 0) {
+    if (
+      nonPenetrableNeigborsContactResult.contacts.length === 0 &&
+      penetrableNeigborsContactResult.contacts.length === 0
+    ) {
       states.add(this.allStates.FreeFall);
       return states;
     }
@@ -111,7 +108,10 @@ export default class PlayerChar {
         if (
           entity.shape === "rect" &&
           entity.y + entity.height < this.y &&
-          getVerticesAboveYLevel(this.getVerticesPpu(), entity.y + entity.height).length > 0
+          getVerticesAboveYLevel(
+            this.getVerticesPpu(),
+            entity.y + entity.height
+          ).length > 0
         ) {
           // center of pChar are below entity but not all 4 vertices below entity
           states.add(this.allStates.Die);
@@ -120,8 +120,8 @@ export default class PlayerChar {
         if (
           entity.shape === "rect" &&
           entity.y > this.y &&
-          getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length < 4 && 
-          entity.x + entity.width >= this.x 
+          getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length < 4 &&
+          entity.x + entity.width >= this.x
         ) {
           // center of pChar are above entity but not all 4 vertices above entity, also pChar center is not more forward than ground edge
           states.add(this.allStates.Die); // TODO: this should be changed to ClimbGround after code for PlayerCharClimbGround class
@@ -129,21 +129,29 @@ export default class PlayerChar {
 
         if (
           entity.shape === "rect" &&
-          getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length === 4 && 
-          entity.x + entity.width >= this.x 
+          getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length ===
+            4 &&
+          !this.isParallel()
+        ) {
+          states.add(this.allStates.OnGroundUnstable);
+        }
+
+        if (
+          entity.shape === "rect" &&
+          getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length ===
+            4 &&
+          this.isParallel() &&
+          entity.x + entity.width >= this.x
         ) {
           // pChar is entirely on top of entity, also pChar center is not more forward than ground edge
-          if (this.isParallel()) {
-            states.add(this.allStates.OnGroundStabe);
-          } else {
-            states.add(this.allStates.OnGroundUnstable);
-          }
+          states.add(this.allStates.OnGroundStabe);
         }
 
         if (
           entity.shape === "rect" &&
           entity.y > this.y &&
-          entity.x + entity.width < this.x 
+          this.isParallel() &&
+          entity.x + entity.width < this.x
         ) {
           // pChar center is above ground and is more forward than the edge of ground
           states.add(this.allStates.FallFromGround);
@@ -179,7 +187,28 @@ export default class PlayerChar {
     }
   }
 
-  // collisionReport() {
-  //   return detectCollision({ p5, pChar, })
-  // }
+  getAngleOfElevation() {
+    // angle of elevation of the player character surface on the right side, i.e. included angle between that surface and horizontal ground
+    let angle = - this.rad % (Math.PI * 0.5);
+    return (angle >= 0) ? angle : angle + Math.PI * 0.5;
+  }
+
+  getLowestVertice() {
+    const flattenVertices = this.getVerticesPpu();
+    const vertices = [];
+    for (let i = 0; i < flattenVertices.length; i += 2) {
+        vertices.push([flattenVertices[i], flattenVertices[i + 1]]);
+    }
+    return vertices.reduce((v, acc) => {
+        return (v[1] > acc[1]) ? v : acc;
+    });
+  }
+
+  getCollisionReport({ p5, entities, displaceX, displaceY }) {
+    return detectCollision({ p5, pChar: this, entities, displaceX, displaceY });
+  }
+
+  getContactReport({ p5, entities }) {
+    return detectContact({ p5, pChar: this, entities, contactThreshold: this.contactThreshold });
+  }
 }

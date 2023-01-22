@@ -2,9 +2,6 @@ import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
-import { detectCollision } from "../customs/CollisionDetection";
-import PlayerCharState from "../customs/PlayerCharStates/PlayerCharState";
-import PlayerCharOnGroundStable from "../customs/PlayerCharStates/PlayerCharOnGroundStable";
 
 export default function GdGameCanvasP5(props) {
   const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
@@ -96,28 +93,7 @@ export default function GdGameCanvasP5(props) {
     }
 
     const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION);
-    while (true) {
-      // check collision with non penetrable entities
-      const result = detectCollision({ p5, pChar: nextPChar, entities: neighbors});
-      // if no collision with non penetrable entities, set penetration to false
-      if (!result.collisions.length) {
-        break;
-      }
-
-      // if collided to any entity of die type, then no need to adjust position of pChar
-      let breaker = false;
-      for (let collision of result.collisions) {
-        if (collision.entity.type === "die") breaker = true;
-      }
-      if (breaker) break;
-
-      // adjust x, y, rad
-      nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x
-      nextPChar.y -= Math.sign(nextPChar.vY) * nextPChar.contactThreshold; // reduce y
-      nextPChar.rad -= Math.sign(nextPChar.vRad) * Math.PI / 180; // reduce one degree
-    }
-
-    pCharRef.current = nextPChar;
+    pCharRef.current = pCharState.adjustNextFramePChar({ p5, nextPChar, neighbors });
     // end of move
 
     // player character drawing
@@ -125,7 +101,7 @@ export default function GdGameCanvasP5(props) {
     if (pCharState.dead()) {
       p5.fill("red");
     } else {
-      p5.fill("green");
+      p5.fill("yellow");
     }
     p5.quad(...pCharRef.current.getVerticesPpu().map(p => p * ppu));
     // end of player character drawing
@@ -136,25 +112,13 @@ export default function GdGameCanvasP5(props) {
       console.log(pCharRef.current.getPlayerCharStatesSet({ p5, neighbors }));
     }
     if (p5.keyIsDown(p5.UP_ARROW)) {
-      console.log("w");
-      const displaceX = 0;
-      const displaceY = -1;
-      pCharRef.current.y += displaceY;
+      pCharRef.current.y -= 1;
     } else if (p5.keyIsDown(p5.DOWN_ARROW)) {
-      console.log("s");
-      const displaceX = 0;
-      const displaceY = 1;
-      pCharRef.current.y += displaceY;
+      pCharRef.current.y += 1;
     } else if (p5.keyIsDown(p5.LEFT_ARROW)) {
-      console.log("a");
-      const displaceX = -1;
-      const displaceY = 0;
-      pCharRef.current.x += displaceX;
+      pCharRef.current.x -= 1;
     } else if (p5.keyIsDown(p5.RIGHT_ARROW)) {
-      console.log("s");
-      const displaceX = 1;
-      const displaceY = 0;
-      pCharRef.current.x += displaceX;
+      pCharRef.current.x += 1;
     }
     // end of key event handling
   };
