@@ -92,7 +92,7 @@ export default function GdGameCanvasP5(props) {
       pCharState.jump();
     }
 
-    const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION);
+    const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION, { p5, neighbors });
     pCharRef.current = pCharState.adjustNextFramePChar({ p5, nextPChar, neighbors });
     // end of move
 

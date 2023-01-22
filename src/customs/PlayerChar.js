@@ -149,8 +149,6 @@ export default class PlayerChar {
 
         if (
           entity.shape === "rect" &&
-          entity.y > this.y &&
-          this.isParallel() &&
           entity.x + entity.width < this.x
         ) {
           // pChar center is above ground and is more forward than the edge of ground
