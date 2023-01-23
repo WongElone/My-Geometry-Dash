@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppContext } from "../App";
 import GdButton from "./GdButton";
 import GdGameCanvasP5 from "./GdGameCanvasP5";
 import Loading from "./Loading";
 import "../css/gd-game.scss";
 import axios from "axios";
+import Entity from "../customs/Entities/Entity";
 
 export default function GdGame() {
   const BASE_WIDTH = 640 * 3; // ppu
@@ -40,8 +41,8 @@ export default function GdGame() {
 
     // add buffer blocks before starting point
     for (let i = 0; i < BUFFER_BLOCKS; i++) {
-      mapEntities.push({
-        shape: "rect",
+      mapEntities.push(new Entity({
+        shapeAlias: "rect",
         type: "safe",
         penetrable: false,
         // everything in ppu
@@ -49,7 +50,7 @@ export default function GdGame() {
         y: START_POINT_Y,
         width: BLOCK_UNIT,
         height: BLOCK_UNIT,
-      });
+      }));
     }
     // end of add buffer blocks before starting point
 
@@ -72,8 +73,8 @@ export default function GdGame() {
         const entity = level[i];
         if (entity === " ") {
         } else if (entity === "-" || entity === "s") {
-          mapEntities.push({
-            shape: "rect",
+          mapEntities.push(new Entity({
+            shapeAlias: "rect",
             type: "safe",
             penetrable: false,
             // everything in ppu
@@ -81,10 +82,10 @@ export default function GdGame() {
             y: oY,
             width: BLOCK_UNIT,
             height: BLOCK_UNIT,
-          });
+          }));
         } else if (entity === "^") {
-          mapEntities.push({
-            shape: "tri",
+          mapEntities.push(new Entity({
+            shapeAlias: "tri",
             type: "die",
             penetrable: true,
             // everything in ppu
@@ -94,10 +95,10 @@ export default function GdGame() {
             y2: oY + BLOCK_UNIT,
             x3: oX + 0.5 * BLOCK_UNIT,
             y3: oY + 0.2 * BLOCK_UNIT,
-          });
+          }));
         } else if (entity === "v") {
-          mapEntities.push({
-            shape: "tri",
+          mapEntities.push(new Entity({
+            shapeAlias: "tri",
             type: "die",
             penetrable: true,
             // everything in ppu
@@ -107,7 +108,7 @@ export default function GdGame() {
             y2: oY,
             x3: oX + 0.5 * BLOCK_UNIT,
             y3: oY + 0.8 * BLOCK_UNIT,
-          });
+          }));
         } else {
           continue;
         }

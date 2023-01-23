@@ -5,7 +5,7 @@ function predictCollision({ p5, pChar, entities, displaceX, displaceY }) {
   for (let i in entities) {
     const entity = entities[i];
     const pCharVertices = pChar.getVerticesPpu(displaceX || 0, displaceY || 0);
-    if (entity.shape === "rect") {
+    if (entity.shape.alias === "rect") {
       willCollide = p5.collideRectPoly(
         entity.x,
         entity.y,
@@ -37,7 +37,7 @@ function detectCollision({ p5, pChar, entities, displaceX, displaceY }) {
   for (let i in entities) {
     let collided = false;
     const entity = entities[i];
-    if (entity.shape === "rect") {
+    if (entity.shape.alias === "rect") {
       collided = p5.collideRectPoly(
         entity.x,
         entity.y,
@@ -50,7 +50,7 @@ function detectCollision({ p5, pChar, entities, displaceX, displaceY }) {
           p5.createVector(pCharVertices[6], pCharVertices[7]),
         ]
       );
-    } else if (entity.shape === "tri") {
+    } else if (entity.shape.alias === "tri") {
       collided = p5.collidePolyPoly(
         [
           p5.createVector(pCharVertices[0], pCharVertices[1]),

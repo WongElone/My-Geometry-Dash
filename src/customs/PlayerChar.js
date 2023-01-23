@@ -6,16 +6,16 @@ import PlayerCharFallFromGround from "./PlayerCharStates/PlayerCharFallFromGroun
 import PlayerCharFreeFall from "./PlayerCharStates/PlayerCharFreeFall";
 
 function getEntityCenter(entity) {
-  if (entity.shape === "rect") {
+  if (entity.shape.alias === "rect") {
     return [entity.x + entity.width * 0.5, entity.y + entity.height * 0.5];
-  } else if (entity.shape === "tri") {
+  } else if (entity.shape.alias === "tri") {
     // centroid
     return [
       (entity.x1 + entity.x2 + entity.x3) / 3,
       (entity.y1 + entity.y2 + entity.y3) / 3,
     ];
   }
-  throw new Error("unknown entity shape");
+  throw new Error("unknown entity shape.alias");
 }
 
 function getVerticesAboveYLevel(vertices, y) {
@@ -110,7 +110,7 @@ export default class PlayerChar {
       for (let contact of nonPenetrableNeigborsContactResult.contacts) {
         const entity = contact.entity;
         if (
-          entity.shape === "rect" &&
+          entity.shape.alias === "rect" &&
           entity.y + entity.height < this.y &&
           getVerticesAboveYLevel(
             this.getVerticesPpu(),
@@ -122,7 +122,7 @@ export default class PlayerChar {
         }
 
         if (
-          entity.shape === "rect" &&
+          entity.shape.alias === "rect" &&
           entity.y > this.y &&
           getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length < 4 &&
           entity.x + entity.width >= this.x
@@ -132,7 +132,7 @@ export default class PlayerChar {
         }
 
         if (
-          entity.shape === "rect" &&
+          entity.shape.alias === "rect" &&
           getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length ===
             4 &&
           !this.isParallel()
@@ -141,7 +141,7 @@ export default class PlayerChar {
         }
 
         if (
-          entity.shape === "rect" &&
+          entity.shape.alias === "rect" &&
           getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length ===
             4 &&
           this.isParallel() &&
@@ -152,7 +152,7 @@ export default class PlayerChar {
         }
 
         if (
-          entity.shape === "rect" &&
+          entity.shape.alias === "rect" &&
           entity.x + entity.width < this.x
         ) {
           // pChar center is above ground and is more forward than the edge of ground

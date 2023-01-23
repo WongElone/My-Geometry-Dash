@@ -3,10 +3,7 @@ import EntityShape from "./EntityShape";
 export default class EntityShapeTri extends EntityShape {
   constructor(entity) {
     super(entity);
-    if (entity.shape !== "tri") {
-      console.error("unmatched entity shape");
-      throw new Error("unmatched entity shape");
-    }
+    this.alias = "tri";
   }
 
   getLargestLength() {
@@ -18,6 +15,34 @@ export default class EntityShapeTri extends EntityShape {
     ]
     return lengths.reduce((l, acc) => {
         return (l > acc) ? l : acc;
+    });
+  }
+
+  getLeftMost() {
+    const e = this.entity;
+    return [e.x1, e.x2, e.x3].reduce((x, acc) => {
+      return (x < acc) ? x : acc;
+    });
+  }
+
+  getRightMost() {
+    const e = this.entity;
+    return [e.x1, e.x2, e.x3].reduce((x, acc) => {
+      return (x > acc) ? x : acc;
+    });
+  }
+
+  getTopMost() {
+    const e = this.entity;
+    return [e.y1, e.y2, e.y3].reduce((y, acc) => {
+      return (y < acc) ? y : acc;
+    });
+  }
+
+  getBottomMost() {
+    const e = this.entity;
+    return [e.y1, e.y2, e.y3].reduce((y, acc) => {
+      return (y > acc) ? y : acc;
     });
   }
 }

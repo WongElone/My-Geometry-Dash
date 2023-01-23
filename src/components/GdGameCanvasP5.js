@@ -2,23 +2,42 @@ import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
-import EntityShapeRect from "../customs/EntityShapes/EntityShapeRect";
-import EntityShapeTri from "../customs/EntityShapes/EntityShapeTri";
 
 export default function GdGameCanvasP5(props) {
   const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
 
-  const pCharRef = useRef(new PlayerChar({
-    x: pCharData.x, // in ppu
-    y: pCharData.y, // in ppu
-    rad: 0, // in rad
-    width: pCharData.blockWidth * BLOCK_UNIT, // in block unit
-    // optional parameters
-    vX: 300,
-    // end of optional parameters
-  }));
+  const pCharRef = useRef(
+    new PlayerChar({
+      x: pCharData.x, // in ppu
+      y: pCharData.y, // in ppu
+      rad: 0, // in rad
+      width: pCharData.blockWidth * BLOCK_UNIT, // in block unit
+      // optional parameters
+      vX: 300,
+      // end of optional parameters
+    })
+  );
+
+  // coordinates of top left corner of FOV
+  const fovRef = useRef({
+    coordinates: [0, 0],
+    WIDTH: BASE_WIDTH,
+    HEIGHT: BASE_HEIGHT,
+    getLeftBoundary: function () {
+      return this.coordinates[0];
+    },
+    getRightBoundary: function () {
+      return this.coordinates[0] + BASE_WIDTH;
+    },
+    getTopBoundary: function () {
+      return this.coordinates[1];
+    },
+    getBottomBoundary: function () {
+      return this.coordinates[1] + BASE_HEIGHT;
+    },
+  });
 
   // map entities init
   let mapEntities = mapData.entities;
@@ -54,17 +73,38 @@ export default function GdGameCanvasP5(props) {
 
     p5.background("#555");
 
-    // TODO: only render map entities that are in range of canvas
     // map
+    // TODO: only render map entities that are close and inside FOV
+    const mapEntitiesToRender = [];
+    const boundaryBuffer = BLOCK_UNIT * 2;
+    for (let entity of mapEntities) {
+      if (
+        entity.shape.getLeftMost() >
+          fovRef.current.getLeftBoundary() - boundaryBuffer ||
+        entity.shape.getRightMost() <
+          fovRef.current.getRightBoundary() + boundaryBuffer ||
+        entity.shape.getTopMost() > fovRef.current.getTopBoundary() - boundaryBuffer ||
+        entity.shape.getBottomMost() + entity.height <
+          fovRef.current.getBottomBoundary() + boundaryBuffer
+      ) {
+        mapEntitiesToRender.push(entity);
+      }
+    }
+
     neighbors = [];
     p5.strokeWeight(1);
     p5.stroke("#999");
-    for (let i = 0; i < mapEntities.length; i++) {
-      const entity = mapEntities[i];
+    for (let entity of mapEntitiesToRender) {
       p5.fill("#fff");
-      if (entity.shape === "rect") {
-        const shape = new EntityShapeRect(entity);
-        if (((pCharRef.current.x - entity.x) ** 2 + (pCharRef.current.y - entity.y) ** 2) ** 0.5 < shape.getLargestLength() + pCharRef.current.getHalfDiagonal() + pCharRef.current.contactThreshold * 4) {
+      if (entity.shape.alias === "rect") {
+        if (
+          ((pCharRef.current.x - entity.x) ** 2 +
+            (pCharRef.current.y - entity.y) ** 2) **
+            0.5 <
+          entity.shape.getLargestLength() +
+            pCharRef.current.getHalfDiagonal() +
+            pCharRef.current.contactThreshold * 4
+        ) {
           neighbors.push(entity);
           p5.fill("orange");
         }
@@ -76,12 +116,19 @@ export default function GdGameCanvasP5(props) {
           entity.height * ppu
         );
         // end of render
-      } else if (entity.shape === "tri") {
-        const shape = new EntityShapeTri(entity);
-        if (((pCharRef.current.x - entity.x1) ** 2 + (pCharRef.current.y - entity.y1) ** 2) ** 0.5 < shape.getLargestLength() + pCharRef.current.getHalfDiagonal() + pCharRef.current.contactThreshold * 4) {
+      } else if (entity.shape.alias === "tri") {
+        if (
+          ((pCharRef.current.x - entity.x1) ** 2 +
+            (pCharRef.current.y - entity.y1) ** 2) **
+            0.5 <
+          entity.shape.getLargestLength() +
+            pCharRef.current.getHalfDiagonal() +
+            pCharRef.current.contactThreshold * 4
+        ) {
           neighbors.push(entity);
           p5.fill("orange");
         }
+        // render
         p5.triangle(
           entity.x1 * ppu,
           entity.y1 * ppu,
@@ -90,23 +137,32 @@ export default function GdGameCanvasP5(props) {
           entity.x3 * ppu,
           entity.y3 * ppu
         );
+        // end of render
         neighbors.push(entity);
       }
     }
     // end of map
 
     // determine state
-    const PCharState = pCharRef.current.getPlayerCharState({p5, neighbors});
+    const PCharState = pCharRef.current.getPlayerCharState({ p5, neighbors });
     const pCharState = new PCharState(pCharRef.current);
     // end of determine state
 
     // move
-    if (p5.keyIsDown(32)) { // spacebar
+    if (p5.keyIsDown(32)) {
+      // spacebar
       pCharState.jump();
     }
 
-    const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION, { p5, neighbors });
-    pCharRef.current = pCharState.adjustNextFramePChar({ p5, nextPChar, neighbors });
+    const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION, {
+      p5,
+      neighbors,
+    });
+    pCharRef.current = pCharState.adjustNextFramePChar({
+      p5,
+      nextPChar,
+      neighbors,
+    });
     // end of move
 
     // player character drawing
@@ -116,7 +172,7 @@ export default function GdGameCanvasP5(props) {
     } else {
       p5.fill("yellow");
     }
-    p5.quad(...pCharRef.current.getVerticesPpu().map(p => p * ppu));
+    p5.quad(...pCharRef.current.getVerticesPpu().map((p) => p * ppu));
     // end of player character drawing
 
     // key event handling
