@@ -4,10 +4,10 @@ export default class PlayerCharFreeFall extends PlayerCharState {
     constructor(pChar) {
         super(pChar);
 
-        if (this.pChar.vY > 1000) {
+        if (this.pChar.vY > 1500) {
             this.pChar.aY = 0;
         } else {
-            this.pChar.aY = 2500;
+            this.pChar.aY = 3750;
         }
 
         if (this.pChar.vRad > 2 * Math.PI) {

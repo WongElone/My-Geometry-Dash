@@ -10,7 +10,7 @@ import Entity from "../customs/Entities/Entity";
 export default function GdGame() {
   const BASE_WIDTH = 640 * 3; // ppu
   const BASE_HEIGHT = 360 * 3; // ppu
-  const BLOCK_UNIT = 20 * 3; // block unit (i.e. number of ppu per block)
+  const BLOCK_UNIT = 30 * 3; // block unit (i.e. number of ppu per block)
   const BUFFER_BLOCKS = 5; // block unit
   const START_POINT_X = BUFFER_BLOCKS * BLOCK_UNIT; // ppu
   const START_POINT_Y = BASE_HEIGHT - 3.2 * BLOCK_UNIT; // ppu
@@ -20,6 +20,9 @@ export default function GdGame() {
     blockWidth: 0.9, // block unit
     blockHeight: 0.9, // block unit
   };
+  const FOV_SETTINGS = {
+    xOffsetFromPChar: - pCharData.x,
+  }
 
   const [isLoadingMap, setIsLoadingMap] = useState(true);
   const [rawMapEntities, setRawMapEntities] = useState(null);
@@ -149,6 +152,7 @@ export default function GdGame() {
                       BLOCK_UNIT={BLOCK_UNIT}
                       BASE_WIDTH={BASE_WIDTH}
                       BASE_HEIGHT={BASE_HEIGHT}
+                      FOV_SETTINGS={FOV_SETTINGS}
                     />
                   </div>
                 );

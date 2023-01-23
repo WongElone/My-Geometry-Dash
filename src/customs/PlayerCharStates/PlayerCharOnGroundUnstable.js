@@ -11,7 +11,7 @@ export default class PlayerCharOnGroundUnstable extends PlayerCharState {
     }
 
     jump() {
-        this.pChar.vY = -1000;
+        this.pChar.vY = -1333;
         this.pChar.aRad = 24 * Math.PI;
         this.pChar.vRad = 0;
     }

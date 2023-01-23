@@ -4,7 +4,7 @@ import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
 
 export default function GdGameCanvasP5(props) {
-  const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
+  const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
 
@@ -15,27 +15,28 @@ export default function GdGameCanvasP5(props) {
       rad: 0, // in rad
       width: pCharData.blockWidth * BLOCK_UNIT, // in block unit
       // optional parameters
-      vX: 300,
+      vX: 600,
       // end of optional parameters
     })
   );
 
   // coordinates of top left corner of FOV
   const fovRef = useRef({
-    coordinates: [0, 0],
+    x: 0,
+    y: 0,
     WIDTH: BASE_WIDTH,
     HEIGHT: BASE_HEIGHT,
     getLeftBoundary: function () {
-      return this.coordinates[0];
+      return this.x;
     },
     getRightBoundary: function () {
-      return this.coordinates[0] + BASE_WIDTH;
+      return this.x + BASE_WIDTH;
     },
     getTopBoundary: function () {
-      return this.coordinates[1];
+      return this.y;
     },
     getBottomBoundary: function () {
-      return this.coordinates[1] + BASE_HEIGHT;
+      return this.y + BASE_HEIGHT;
     },
   });
 
@@ -73,7 +74,12 @@ export default function GdGameCanvasP5(props) {
 
     p5.background("#555");
 
-    // map
+
+    // update FOV
+    fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
+    // end of update FOV
+
+    // map entities
     // TODO: only render map entities that are close and inside FOV
     const mapEntitiesToRender = [];
     const boundaryBuffer = BLOCK_UNIT * 2;
@@ -95,58 +101,63 @@ export default function GdGameCanvasP5(props) {
     p5.strokeWeight(1);
     p5.stroke("#999");
     for (let entity of mapEntitiesToRender) {
+      if (
+        ((pCharRef.current.x - entity.x) ** 2 +
+          (pCharRef.current.y - entity.y) ** 2) **
+          0.5 <
+        entity.shape.getLargestLength() +
+          pCharRef.current.getHalfDiagonal() +
+          pCharRef.current.contactThreshold * 4
+      ) {
+        neighbors.push(entity);
+      }
+
+      // render map entities
       p5.fill("#fff");
       if (entity.shape.alias === "rect") {
-        if (
-          ((pCharRef.current.x - entity.x) ** 2 +
-            (pCharRef.current.y - entity.y) ** 2) **
-            0.5 <
-          entity.shape.getLargestLength() +
-            pCharRef.current.getHalfDiagonal() +
-            pCharRef.current.contactThreshold * 4
-        ) {
-          neighbors.push(entity);
-          p5.fill("orange");
-        }
-        // render
         p5.rect(
-          entity.x * ppu,
+          // entity.x * ppu,
+          // entity.y * ppu,
+          // entity.width * ppu,
+          // entity.height * ppu
+          (entity.x - fovRef.current.x) * ppu,
           entity.y * ppu,
           entity.width * ppu,
           entity.height * ppu
         );
-        // end of render
       } else if (entity.shape.alias === "tri") {
-        if (
-          ((pCharRef.current.x - entity.x1) ** 2 +
-            (pCharRef.current.y - entity.y1) ** 2) **
-            0.5 <
-          entity.shape.getLargestLength() +
-            pCharRef.current.getHalfDiagonal() +
-            pCharRef.current.contactThreshold * 4
-        ) {
-          neighbors.push(entity);
-          p5.fill("orange");
-        }
-        // render
         p5.triangle(
-          entity.x1 * ppu,
+          (entity.x1 - fovRef.current.x) * ppu,
           entity.y1 * ppu,
-          entity.x2 * ppu,
+          (entity.x2 - fovRef.current.x) * ppu,
           entity.y2 * ppu,
-          entity.x3 * ppu,
+          (entity.x3 - fovRef.current.x) * ppu,
           entity.y3 * ppu
         );
-        // end of render
-        neighbors.push(entity);
       }
+      // end of render map entities
     }
-    // end of map
+    // end of map entities
 
     // determine state
     const PCharState = pCharRef.current.getPlayerCharState({ p5, neighbors });
     const pCharState = new PCharState(pCharRef.current);
     // end of determine state
+
+    // player character rendering
+    p5.strokeWeight(0);
+    if (pCharState.dead()) {
+      p5.fill("red");
+    } else {
+      p5.fill("yellow");
+    }
+    p5.quad(...pCharRef.current.getVerticesPpu().map((p, index) => {
+      if (index % 2 === 0) {
+        return (p - fovRef.current.x) * ppu;
+      }
+      return p * ppu;
+    }));
+    // end of player character rendering
 
     // move
     if (p5.keyIsDown(32)) {
@@ -164,16 +175,6 @@ export default function GdGameCanvasP5(props) {
       neighbors,
     });
     // end of move
-
-    // player character drawing
-    p5.strokeWeight(0);
-    if (pCharState.dead()) {
-      p5.fill("red");
-    } else {
-      p5.fill("yellow");
-    }
-    p5.quad(...pCharRef.current.getVerticesPpu().map((p) => p * ppu));
-    // end of player character drawing
 
     // key event handling
     if (p5.keyIsDown(83)) {

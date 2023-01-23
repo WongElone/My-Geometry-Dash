@@ -10,7 +10,7 @@ export default class PlayerCharOnGroundStable extends PlayerCharState {
   }
 
   jump() {
-    this.pChar.vY = -1000;
+    this.pChar.vY = -1500;
     this.pChar.aRad = 24 * Math.PI;
   }
 
