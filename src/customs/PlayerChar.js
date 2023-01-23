@@ -61,9 +61,13 @@ export default class PlayerChar {
     );
   }
 
+  getHalfDiagonal() {
+    return this.width * 2 ** -0.5
+  }
+
   getVerticesPpu(displaceX = 0, displaceY = 0) {
     // get vertices in ppu
-    const halfDiagonal = this.width * 2 ** -0.5;
+    const halfDiagonal = this.getHalfDiagonal();
     return [
       this.x + displaceX + halfDiagonal * Math.cos(this.rad + Math.PI * 0.25),
       this.y + displaceY + halfDiagonal * Math.sin(this.rad + Math.PI * 0.25), // radian anticlockwise in cartisian coordinate = clockwise in canvas

@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
+import EntityShapeRect from "../customs/EntityShapes/EntityShapeRect";
+import EntityShapeTri from "../customs/EntityShapes/EntityShapeTri";
 
 export default function GdGameCanvasP5(props) {
   const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT } = props;
@@ -57,18 +59,29 @@ export default function GdGameCanvasP5(props) {
     neighbors = [];
     p5.strokeWeight(1);
     p5.stroke("#999");
-    p5.fill("#fff");
     for (let i = 0; i < mapEntities.length; i++) {
       const entity = mapEntities[i];
+      p5.fill("#fff");
       if (entity.shape === "rect") {
+        const shape = new EntityShapeRect(entity);
+        if (((pCharRef.current.x - entity.x) ** 2 + (pCharRef.current.y - entity.y) ** 2) ** 0.5 < shape.getLargestLength() + pCharRef.current.getHalfDiagonal() + pCharRef.current.contactThreshold * 4) {
+          neighbors.push(entity);
+          p5.fill("orange");
+        }
+        // render
         p5.rect(
           entity.x * ppu,
           entity.y * ppu,
           entity.width * ppu,
           entity.height * ppu
         );
-        neighbors.push(entity);
+        // end of render
       } else if (entity.shape === "tri") {
+        const shape = new EntityShapeTri(entity);
+        if (((pCharRef.current.x - entity.x1) ** 2 + (pCharRef.current.y - entity.y1) ** 2) ** 0.5 < shape.getLargestLength() + pCharRef.current.getHalfDiagonal() + pCharRef.current.contactThreshold * 4) {
+          neighbors.push(entity);
+          p5.fill("orange");
+        }
         p5.triangle(
           entity.x1 * ppu,
           entity.y1 * ppu,
