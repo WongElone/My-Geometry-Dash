@@ -127,8 +127,12 @@ export default class PlayerChar {
           getVerticesAboveYLevel(this.getVerticesPpu(), entity.y).length < 4 &&
           entity.x + entity.width >= this.x
         ) {
-          // center of pChar are above entity but not all 4 vertices above entity, also pChar center is not more forward than ground edge
-          states.add(this.allStates.Die); // TODO: this should be changed to ClimbGround after code for PlayerCharClimbGround class
+          if (this.vY <= 0) {
+            // center of pChar are above entity but not all 4 vertices above entity, also pChar center is not more forward than ground edge
+            states.add(this.allStates.Die); // TODO: this should be changed to ClimbGround after code for PlayerCharClimbGround class
+          } else {
+            states.add(this.allStates.OnGroundStabe);
+          }
         }
 
         if (

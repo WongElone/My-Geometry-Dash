@@ -23,10 +23,24 @@ export default class PlayerCharFallFromGround extends PlayerCharState {
     const oldRad = nextPChar.rad;
 
     // adjust rad
-    while (true) {
+    let angleReverse = false;
+    let loopCount = 0;
+    while (loopCount < 9999) {
+      loopCount += 1;
       const report = nextPChar.getCollisionReport({ p5, entities: neighbors});
       if (!report.collisions.length) break;
-      nextPChar.rad += Math.PI / 180;
+
+      if (nextPChar.rad - oldRad > Math.PI * 0.5) {
+        angleReverse = true;
+        nextPChar.rad = oldRad - Math.PI / 180;
+        continue;
+      }
+
+      if (angleReverse) {
+        nextPChar.rad -= Math.PI / 180;
+      } else {
+        nextPChar.rad += Math.PI / 180;
+      }
     }
 
     // new angular velocity

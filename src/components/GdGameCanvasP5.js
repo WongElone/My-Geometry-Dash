@@ -26,6 +26,8 @@ export default function GdGameCanvasP5(props) {
     y: 0,
     WIDTH: BASE_WIDTH,
     HEIGHT: BASE_HEIGHT,
+    vY: 0,
+    aY: 0,
     getLeftBoundary: function () {
       return this.x;
     },
@@ -77,6 +79,33 @@ export default function GdGameCanvasP5(props) {
 
     // update FOV
     fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
+    if (pCharRef.current.y < fovRef.current.y + BASE_HEIGHT * 0.25) { // too high
+
+      // const pCharSpeedY = Math.abs(pCharRef.current.vY);
+      // fovRef.current.vY -= Math.max(pCharSpeedY, 20);
+      // fovRef.current.y += Math.max(fovRef.current.vY * FRAME_DURATION, -5);
+      if (fovRef.current.vY > -300) {
+        fovRef.current.aY = -3000;
+      }
+    } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.75) { // to low
+
+      // const pCharSpeedY = Math.abs(pCharRef.current.vY);
+      // fovRef.current.vY += Math.max(pCharSpeedY, 20);
+      // fovRef.current.y += Math.min(fovRef.current.vY * FRAME_DURATION, 5);
+      if (fovRef.current.vY < 300) {
+        fovRef.current.aY = 3000;
+      }
+    } else {
+      if (fovRef.current.vY < -30) {
+        fovRef.current.aY = 3000;
+      } else if (fovRef.current.vY > 30) {
+        fovRef.current.aY = -3000;
+      } else {
+        fovRef.current.vY = 0;
+      }
+    }
+    fovRef.current.y += fovRef.current.vY * FRAME_DURATION + 0.5 * fovRef.current.aY * (FRAME_DURATION ** 2);
+    fovRef.current.vY += fovRef.current.aY * FRAME_DURATION;
     // end of update FOV
 
     // map entities
@@ -121,18 +150,18 @@ export default function GdGameCanvasP5(props) {
           // entity.width * ppu,
           // entity.height * ppu
           (entity.x - fovRef.current.x) * ppu,
-          entity.y * ppu,
+          (entity.y - fovRef.current.y) * ppu,
           entity.width * ppu,
           entity.height * ppu
         );
       } else if (entity.shape.alias === "tri") {
         p5.triangle(
           (entity.x1 - fovRef.current.x) * ppu,
-          entity.y1 * ppu,
+          (entity.y1 - fovRef.current.y) * ppu,
           (entity.x2 - fovRef.current.x) * ppu,
-          entity.y2 * ppu,
+          (entity.y2 - fovRef.current.y) * ppu,
           (entity.x3 - fovRef.current.x) * ppu,
-          entity.y3 * ppu
+          (entity.y3 - fovRef.current.y) * ppu
         );
       }
       // end of render map entities
@@ -142,6 +171,7 @@ export default function GdGameCanvasP5(props) {
     // determine state
     const PCharState = pCharRef.current.getPlayerCharState({ p5, neighbors });
     const pCharState = new PCharState(pCharRef.current);
+    console.log(PCharState);
     // end of determine state
 
     // player character rendering
@@ -155,7 +185,7 @@ export default function GdGameCanvasP5(props) {
       if (index % 2 === 0) {
         return (p - fovRef.current.x) * ppu;
       }
-      return p * ppu;
+      return (p - fovRef.current.y) * ppu;
     }));
     // end of player character rendering
 
