@@ -79,7 +79,7 @@ export default function GdGameCanvasP5(props) {
 
     // update FOV
     fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
-    if (pCharRef.current.y < fovRef.current.y + BASE_HEIGHT * 0.25) { // too high
+    if (pCharRef.current.y < fovRef.current.y + BASE_HEIGHT * 0.3) { // too high
 
       // const pCharSpeedY = Math.abs(pCharRef.current.vY);
       // fovRef.current.vY -= Math.max(pCharSpeedY, 20);
@@ -87,7 +87,7 @@ export default function GdGameCanvasP5(props) {
       if (fovRef.current.vY > -300) {
         fovRef.current.aY = -3000;
       }
-    } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.75) { // to low
+    } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.7) { // to low
 
       // const pCharSpeedY = Math.abs(pCharRef.current.vY);
       // fovRef.current.vY += Math.max(pCharSpeedY, 20);
