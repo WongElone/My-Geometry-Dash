@@ -7,6 +7,8 @@ import "../css/gd-game.scss";
 import axios from "axios";
 import Entity from "../customs/Entities/Entity";
 import GdGameOverDialog from "./dialogs/GdGameOverDialog";
+import GdGamePauseDialog from "./dialogs/GdGamePauseDialog";
+import GdIconButton from "./GdIconButton";
 
 export default function GdGame() {
   const BASE_WIDTH = 640 * 3; // ppu
@@ -30,13 +32,16 @@ export default function GdGame() {
   const [mapData, setMapData] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [openGameOverDialog, setOpenGameOverDialog] = useState(false);
+  const [gamePause, setGamePause] = useState(false);
+  const [openGamePauseDialog, setOpenGamePauseDialog] = useState(false);
 
   useEffect(() => {
-    if (gameOver) {
-      // popup a game over dialog
-      setOpenGameOverDialog(true);
-    }
+    setOpenGameOverDialog(gameOver);
   }, [gameOver]);
+
+  useEffect(() => {
+    setOpenGamePauseDialog(gamePause);
+  }, [gamePause]);
 
   // fetch map data from map raw data file, put the raw data in rawMapEntities
   useEffect(() => {
@@ -164,6 +169,8 @@ export default function GdGame() {
                     <GdGameCanvasP5
                       gameOver={gameOver}
                       setGameOver={setGameOver}
+                      gamePause={gamePause}
+                      setGamePause={setGamePause}
                       mapData={mapData}
                       pCharData={pCharData}
                       BLOCK_UNIT={BLOCK_UNIT}
@@ -172,16 +179,38 @@ export default function GdGame() {
                       FOV_SETTINGS={FOV_SETTINGS}
                     />
                     {openGameOverDialog && 
-                    <GdGameOverDialog
-                      setOpen={setOpenGameOverDialog}
-                      onClose={() => {
-                        setAppState({ ...appState, in: "select-map", game: null });
-                      }}
-                      onRetry={() => {
-                        setIsLoadingMap(true);
-                        setGameOver(false);
-                      }}
-                    />}
+                      <GdGameOverDialog
+                        setOpen={setOpenGameOverDialog}
+                        onClose={() => {
+                          setAppState({ ...appState, in: "select-map", game: null });
+                        }}
+                        onRetry={() => {
+                          setIsLoadingMap(true);
+                          setGameOver(false);
+                        }}
+                      />
+                    }
+                    {openGamePauseDialog &&
+                      <GdGamePauseDialog
+                        setOpen={setOpenGamePauseDialog}
+                        onClose={() => {
+                          setOpenGamePauseDialog(false);
+                          setGamePause(false);
+                        }}
+                        onGiveUp={() => {
+                          setAppState({ ...appState, in: "select-map", game: null });
+                        }}
+                      />
+                    }
+                    {!openGamePauseDialog && 
+                      <div style={{ zIndex: 10, position: "absolute", top: "45px", right: "45px" }}>
+                        <GdIconButton
+                          onClick={() => setGamePause(true)}
+                        >
+                          ||
+                        </GdIconButton>
+                      </div>
+                    }
                   </div>
                 );
               }

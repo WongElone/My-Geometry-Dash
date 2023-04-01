@@ -4,7 +4,7 @@ import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
 
 export default function GdGameCanvasP5(props) {
-  const { gameOver, setGameOver, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
+  const { gameOver, setGameOver, gamePause, setGamePause, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
 
@@ -78,34 +78,36 @@ export default function GdGameCanvasP5(props) {
 
 
     // update FOV
-    fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
-    if (pCharRef.current.y < fovRef.current.y + BASE_HEIGHT * 0.3) { // too high
+    if (!gameOver && !gamePause) {
+      fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
+      if (pCharRef.current.y < fovRef.current.y + BASE_HEIGHT * 0.3) { // too high
 
-      // const pCharSpeedY = Math.abs(pCharRef.current.vY);
-      // fovRef.current.vY -= Math.max(pCharSpeedY, 20);
-      // fovRef.current.y += Math.max(fovRef.current.vY * FRAME_DURATION, -5);
-      if (fovRef.current.vY > -300) {
-        fovRef.current.aY = -3000;
-      }
-    } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.7) { // to low
+        // const pCharSpeedY = Math.abs(pCharRef.current.vY);
+        // fovRef.current.vY -= Math.max(pCharSpeedY, 20);
+        // fovRef.current.y += Math.max(fovRef.current.vY * FRAME_DURATION, -5);
+        if (fovRef.current.vY > -300) {
+          fovRef.current.aY = -3000;
+        }
+      } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.7) { // to low
 
-      // const pCharSpeedY = Math.abs(pCharRef.current.vY);
-      // fovRef.current.vY += Math.max(pCharSpeedY, 20);
-      // fovRef.current.y += Math.min(fovRef.current.vY * FRAME_DURATION, 5);
-      if (fovRef.current.vY < 300) {
-        fovRef.current.aY = 3000;
-      }
-    } else {
-      if (fovRef.current.vY < -30) {
-        fovRef.current.aY = 3000;
-      } else if (fovRef.current.vY > 30) {
-        fovRef.current.aY = -3000;
+        // const pCharSpeedY = Math.abs(pCharRef.current.vY);
+        // fovRef.current.vY += Math.max(pCharSpeedY, 20);
+        // fovRef.current.y += Math.min(fovRef.current.vY * FRAME_DURATION, 5);
+        if (fovRef.current.vY < 300) {
+          fovRef.current.aY = 3000;
+        }
       } else {
-        fovRef.current.vY = 0;
+        if (fovRef.current.vY < -30) {
+          fovRef.current.aY = 3000;
+        } else if (fovRef.current.vY > 30) {
+          fovRef.current.aY = -3000;
+        } else {
+          fovRef.current.vY = 0;
+        }
       }
+      fovRef.current.y += fovRef.current.vY * FRAME_DURATION + 0.5 * fovRef.current.aY * (FRAME_DURATION ** 2);
+      fovRef.current.vY += fovRef.current.aY * FRAME_DURATION;
     }
-    fovRef.current.y += fovRef.current.vY * FRAME_DURATION + 0.5 * fovRef.current.aY * (FRAME_DURATION ** 2);
-    fovRef.current.vY += fovRef.current.aY * FRAME_DURATION;
     // end of update FOV
 
     // map entities
@@ -174,10 +176,6 @@ export default function GdGameCanvasP5(props) {
     console.log(PCharState);
     // end of determine state
 
-    if (pCharState.dead() && !gameOver) {
-      setGameOver(true);
-    }
-
     // player character rendering
     p5.strokeWeight(0);
     if (pCharState.dead()) {
@@ -193,38 +191,37 @@ export default function GdGameCanvasP5(props) {
     }));
     // end of player character rendering
 
-    // move
+    // key event handling
     if (p5.keyIsDown(32)) {
-      // spacebar
+      // press spacebar
       pCharState.jump();
     }
-
-    const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION, {
-      p5,
-      neighbors,
-    });
-    pCharRef.current = pCharState.adjustNextFramePChar({
-      p5,
-      nextPChar,
-      neighbors,
-    });
-    // end of move
-
-    // key event handling
+    if (p5.keyIsDown(27) && !gameOver) {
+      // press esc
+      setGamePause(true);
+    }
     if (p5.keyIsDown(83)) {
       // console.log(pCharState);
       console.log(pCharRef.current.getPlayerCharStatesSet({ p5, neighbors }));
     }
-    if (p5.keyIsDown(p5.UP_ARROW)) {
-      pCharRef.current.y -= 1;
-    } else if (p5.keyIsDown(p5.DOWN_ARROW)) {
-      pCharRef.current.y += 1;
-    } else if (p5.keyIsDown(p5.LEFT_ARROW)) {
-      pCharRef.current.x -= 1;
-    } else if (p5.keyIsDown(p5.RIGHT_ARROW)) {
-      pCharRef.current.x += 1;
-    }
     // end of key event handling
+
+    if (pCharState.dead() && !gameOver) {
+      setGamePause(false);
+      setGameOver(true);
+    }
+
+    if (!gameOver && !gamePause) {
+      const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION, {
+        p5,
+        neighbors,
+      });
+      pCharRef.current = pCharState.adjustNextFramePChar({
+        p5,
+        nextPChar,
+        neighbors,
+      });
+    }
   };
 
   const windowResized = (p5) => {
