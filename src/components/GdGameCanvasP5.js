@@ -1,10 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
 
 export default function GdGameCanvasP5(props) {
-  const { mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
+  const { gameOver, setGameOver, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
 
@@ -173,6 +173,10 @@ export default function GdGameCanvasP5(props) {
     const pCharState = new PCharState(pCharRef.current);
     console.log(PCharState);
     // end of determine state
+
+    if (pCharState.dead() && !gameOver) {
+      setGameOver(true);
+    }
 
     // player character rendering
     p5.strokeWeight(0);

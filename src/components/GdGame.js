@@ -6,6 +6,7 @@ import Loading from "./Loading";
 import "../css/gd-game.scss";
 import axios from "axios";
 import Entity from "../customs/Entities/Entity";
+import GdGameOverDialog from "./dialogs/GdGameOverDialog";
 
 export default function GdGame() {
   const BASE_WIDTH = 640 * 3; // ppu
@@ -27,7 +28,17 @@ export default function GdGame() {
   const [isLoadingMap, setIsLoadingMap] = useState(true);
   const [rawMapEntities, setRawMapEntities] = useState(null);
   const [mapData, setMapData] = useState(null);
+  const [gameOver, setGameOver] = useState(false);
+  const [openGameOverDialog, setOpenGameOverDialog] = useState(false);
 
+  useEffect(() => {
+    if (gameOver) {
+      // popup a game over dialog
+      setOpenGameOverDialog(true);
+    }
+  }, [gameOver]);
+
+  // fetch map data from map raw data file, put the raw data in rawMapEntities
   useEffect(() => {
     const fetchData = async () => {
       let resp = await axios.get("/entities.ett");
@@ -37,6 +48,7 @@ export default function GdGame() {
     fetchData().catch((err) => console.error(err));
   }, []);
 
+  // when rawMapEntities are populated, will trigger this use effect which populate mapData
   useEffect(() => {
     if (rawMapEntities === null) return;
 
@@ -67,8 +79,6 @@ export default function GdGame() {
       }
     });
     
-    // TODO: reduce height of rect
-    // TODO: handle upward slope and downward slope
     levels.forEach((level, index) => {
       let oY = START_POINT_Y + (index - startLevelIndex) * 1 * BLOCK_UNIT; // y displacement from canvas origin in ppu
       let oX = START_POINT_X; // x displacement from canvas origin in ppu
@@ -124,7 +134,12 @@ export default function GdGame() {
     setMapData({ ...mapData, entities: mapEntities });
   }, [rawMapEntities]);
 
+  // after mapData is populated, will trigger this useEffect which will wait for 1 second before turning isLoadingMap to false
+  // when it is false, the loading page disappear and enter the game page
+  // as a result, no matter how fast the map raw data fetching is, the loading page will stay at least 1 second, which gives better user experience
   useEffect(() => {
+    if (!isLoadingMap) return;
+
     const timerId = setTimeout(() => {
       if (mapData.entities.length) {
         setIsLoadingMap(false);
@@ -132,7 +147,7 @@ export default function GdGame() {
     }, 1000);
 
     return () => clearTimeout(timerId);
-  }, [mapData]);
+  }, [mapData, isLoadingMap]);
 
   return (
     <>
@@ -145,8 +160,10 @@ export default function GdGame() {
                 return <Loading />;
               } else {
                 return (
-                  <div style={{ padding: "30px" }}>
+                  <div style={{ padding: "30px", position: "relative" }}>
                     <GdGameCanvasP5
+                      gameOver={gameOver}
+                      setGameOver={setGameOver}
                       mapData={mapData}
                       pCharData={pCharData}
                       BLOCK_UNIT={BLOCK_UNIT}
@@ -154,6 +171,17 @@ export default function GdGame() {
                       BASE_HEIGHT={BASE_HEIGHT}
                       FOV_SETTINGS={FOV_SETTINGS}
                     />
+                    {openGameOverDialog && 
+                    <GdGameOverDialog
+                      setOpen={setOpenGameOverDialog}
+                      onClose={() => {
+                        setAppState({ ...appState, in: "select-map", game: null });
+                      }}
+                      onRetry={() => {
+                        setIsLoadingMap(true);
+                        setGameOver(false);
+                      }}
+                    />}
                   </div>
                 );
               }
