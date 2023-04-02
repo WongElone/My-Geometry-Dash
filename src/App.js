@@ -46,6 +46,18 @@ function App() {
     );
   }
 
+  useEffect(() => {
+    const handleFullScreen = () => {
+      document.documentElement.requestFullscreen();
+    };
+
+    document.documentElement.addEventListener('click', handleFullScreen);
+
+    return () => {
+      document.documentElement.removeEventListener('click', handleFullScreen);
+    };
+  }, []);
+
   return (
     <AppContext.Provider value={{ appState, setAppState }}>
       {/* <script src="./plugins/p5.min.js"></script> */}

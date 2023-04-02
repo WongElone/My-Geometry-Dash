@@ -6,8 +6,24 @@
     height: 100%;
     row-gap: 100px;
 
+    @media (max-width: 768px), (max-height: 576px) {
+        row-gap: 60px;
+    }
+
+    @media (max-width: 576px), (max-height: 400px) {
+        row-gap: 30px;
+    }
+
     .title {
         font-size: 80px;
+        
+        @media (max-width: 768px), (max-height: 576px) {
+            font-size: 48px;
+        }
+
+        @media (max-width: 576px), (max-height: 400px) {
+            font-size: 32px;
+        }
     }
 
     .btns-container {
