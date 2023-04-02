@@ -48,19 +48,35 @@ function App() {
 
   useEffect(() => {
     const handleFullScreen = () => {
-      document.documentElement.requestFullscreen();
+      document.documentElement.requestFullscreen()
+      .then(() => {})
+      .catch((error) => {
+        console.error('Failed to request fullscreen:', error);
+      });
     };
 
-    document.documentElement.addEventListener('click', handleFullScreen);
+    const handleLockOrientation = () => {
+      /* eslint-disable no-restricted-globals */ screen.orientation.lock('landscape-primary')
+      .then(() => {})
+      .catch((error) => {
+        console.error('Failed to lock screen orientation:', error);
+      });
+    };
+
+    const handleDocumentClick = () => {
+      handleFullScreen();
+      handleLockOrientation();
+    }
+
+    document.documentElement.addEventListener('click', handleDocumentClick);
 
     return () => {
-      document.documentElement.removeEventListener('click', handleFullScreen);
+      document.documentElement.removeEventListener('click', handleDocumentClick);
     };
   }, []);
 
   return (
     <AppContext.Provider value={{ appState, setAppState }}>
-      {/* <script src="./plugins/p5.min.js"></script> */}
       <div className="gd-app">
         <h1 style={{ display: "none" }}>Geometry Dash</h1>
         {(() => {
