@@ -22,4 +22,8 @@ export default class PlayerCharState {
   dead() {
     return false;
   }
+
+  finish() {
+    return false;
+  }
 }

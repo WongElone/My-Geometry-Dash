@@ -4,6 +4,7 @@ import PlayerCharOnGroundStable from "./PlayerCharStates/PlayerCharOnGroundStabl
 import PlayerCharOnGroundUnstable from "./PlayerCharStates/PlayerCharOnGroundUnstable";
 import PlayerCharFallFromGround from "./PlayerCharStates/PlayerCharFallFromGround";
 import PlayerCharFreeFall from "./PlayerCharStates/PlayerCharFreeFall";
+import PlayerCharFinish from "./PlayerCharStates/PlayerCharFinish";
 
 function getEntityCenter(entity) {
   if (entity.shape.alias === "rect") {
@@ -49,6 +50,7 @@ export default class PlayerChar {
       OnGroundStabe: PlayerCharOnGroundStable,
       OnGroundUnstable: PlayerCharOnGroundUnstable,
       FallFromGround: PlayerCharFallFromGround,
+      Finish: PlayerCharFinish,
     });
   }
 
@@ -103,6 +105,9 @@ export default class PlayerChar {
         const entity = contact.entity;
         if (entity.type === "die") {
           states.add(this.allStates.Die);
+        }
+        if (entity.type === "finish") {
+          states.add(this.allStates.Finish);
         }
       }
     }
@@ -179,6 +184,8 @@ export default class PlayerChar {
 
     if (states.has(this.allStates.Die)) {
       return this.allStates.Die;
+    } else if (states.has(this.allStates.Finish)) {
+      return this.allStates.Finish;
     } else if (states.has(this.allStates.OnGroundStabe)) {
       return this.allStates.OnGroundStabe;
     } else if (states.has(this.allStates.OnGroundUnstable)) {

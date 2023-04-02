@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { AppContext } from "../App";
-import GdButton from "./GdButton";
 import GdGameCanvasP5 from "./GdGameCanvasP5";
 import Loading from "./Loading";
 import "../css/gd-game.scss";
@@ -9,6 +8,7 @@ import Entity from "../customs/Entities/Entity";
 import GdGameOverDialog from "./dialogs/GdGameOverDialog";
 import GdGamePauseDialog from "./dialogs/GdGamePauseDialog";
 import GdIconButton from "./GdIconButton";
+import GdGameFinishDialog from "./dialogs/GdGameFinishDialog";
 
 export default function GdGame() {
   const BASE_WIDTH = 640 * 3; // ppu
@@ -34,6 +34,8 @@ export default function GdGame() {
   const [openGameOverDialog, setOpenGameOverDialog] = useState(false);
   const [gamePause, setGamePause] = useState(false);
   const [openGamePauseDialog, setOpenGamePauseDialog] = useState(false);
+  const [gameFinish, setGameFinish] = useState(false);
+  const [openGameFinishDialog, setOpenGameFinishDialog] = useState(false);
 
   useEffect(() => {
     setOpenGameOverDialog(gameOver);
@@ -42,6 +44,10 @@ export default function GdGame() {
   useEffect(() => {
     setOpenGamePauseDialog(gamePause);
   }, [gamePause]);
+
+  useEffect(() => {
+    setOpenGameFinishDialog(gameFinish);
+  }, [gameFinish]);
 
   // fetch map data from map raw data file, put the raw data in rawMapEntities
   useEffect(() => {
@@ -84,6 +90,7 @@ export default function GdGame() {
       }
     });
     
+    let finishPointOX;
     levels.forEach((level, index) => {
       let oY = START_POINT_Y + (index - startLevelIndex) * 1 * BLOCK_UNIT; // y displacement from canvas origin in ppu
       let oX = START_POINT_X; // x displacement from canvas origin in ppu
@@ -127,12 +134,27 @@ export default function GdGame() {
             x3: oX + 0.5 * BLOCK_UNIT,
             y3: oY + 0.8 * BLOCK_UNIT,
           }));
+        } else if (entity === "f") {
+          finishPointOX = oX;
         } else {
           continue;
         }
         oX += BLOCK_UNIT;
       }
     });
+    if (!finishPointOX) {
+      throw new Error("finish point not found in .ett file");
+    }
+    mapEntities.push(new Entity({
+      shapeAlias: "rect",
+      type: "finish",
+      penetrable: true,
+      // everything in ppu
+      x: finishPointOX,
+      y: - BLOCK_UNIT * 50,
+      width: BLOCK_UNIT * 50,
+      height: BLOCK_UNIT * 500,
+    }));
     // end of add map entities
 
     console.log("Map Entities", mapEntities);
@@ -159,18 +181,19 @@ export default function GdGame() {
       <AppContext.Consumer>
         {({ appState, setAppState }) => (
           <div className="gd-game">
-            <div>{JSON.stringify(appState)}</div>
             {(() => {
               if (isLoadingMap) {
                 return <Loading />;
               } else {
                 return (
-                  <div style={{ padding: "30px", position: "relative" }}>
+                  <div style={{ padding: "0", position: "relative" }}>
                     <GdGameCanvasP5
                       gameOver={gameOver}
                       setGameOver={setGameOver}
                       gamePause={gamePause}
                       setGamePause={setGamePause}
+                      gameFinish={gameFinish}
+                      setGameFinish={setGameFinish}
                       mapData={mapData}
                       pCharData={pCharData}
                       BLOCK_UNIT={BLOCK_UNIT}
@@ -187,6 +210,18 @@ export default function GdGame() {
                         onRetry={() => {
                           setIsLoadingMap(true);
                           setGameOver(false);
+                        }}
+                      />
+                    }
+                    {openGameFinishDialog && 
+                      <GdGameFinishDialog
+                        setOpen={setOpenGameFinishDialog}
+                        onClose={() => {
+                          setAppState({ ...appState, in: "select-map", game: null });
+                        }}
+                        onRetry={() => {
+                          setIsLoadingMap(true);
+                          setGameFinish(false);
                         }}
                       />
                     }
@@ -215,13 +250,6 @@ export default function GdGame() {
                 );
               }
             })()}
-            <GdButton
-              onClick={() =>
-                setAppState({ ...appState, in: "select-map", game: null })
-              }
-            >
-              Back
-            </GdButton>
           </div>
         )}
       </AppContext.Consumer>

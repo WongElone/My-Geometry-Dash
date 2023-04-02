@@ -4,7 +4,7 @@ import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
 
 export default function GdGameCanvasP5(props) {
-  const { gameOver, setGameOver, gamePause, setGamePause, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
+  const { gameOver, setGameOver, gamePause, setGamePause, gameFinish, setGameFinish, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
 
@@ -78,8 +78,19 @@ export default function GdGameCanvasP5(props) {
 
 
     // update FOV
-    if (!gameOver && !gamePause) {
-      fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
+    if (!gameOver && !gamePause && !gameFinish) {
+      //// x-coord adjustment
+      const entityFinish = mapEntities.filter(entity => entity.type === "finish")[0];
+      // if the 'finish' entity enters the fov for a certain distance (0.3 * BLOCK_UNIT)
+      // the fov should stop horizontally moving
+      if (entityFinish.shape.getLeftMost() < fovRef.current.getRightBoundary() - 0.3 * BLOCK_UNIT) {
+        // do nothing
+      } else {
+        fovRef.current.x = FOV_SETTINGS.xOffsetFromPChar + pCharRef.current.x;
+      }
+      //// end of x-coord adjustment
+
+      //// y-coord adjustment
       if (pCharRef.current.y < fovRef.current.y + BASE_HEIGHT * 0.3) { // too high
 
         // const pCharSpeedY = Math.abs(pCharRef.current.vY);
@@ -88,7 +99,7 @@ export default function GdGameCanvasP5(props) {
         if (fovRef.current.vY > -300) {
           fovRef.current.aY = -3000;
         }
-      } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.7) { // to low
+      } else if (pCharRef.current.y > fovRef.current.y + BASE_HEIGHT * 0.7) { // too low
 
         // const pCharSpeedY = Math.abs(pCharRef.current.vY);
         // fovRef.current.vY += Math.max(pCharSpeedY, 20);
@@ -107,6 +118,7 @@ export default function GdGameCanvasP5(props) {
       }
       fovRef.current.y += fovRef.current.vY * FRAME_DURATION + 0.5 * fovRef.current.aY * (FRAME_DURATION ** 2);
       fovRef.current.vY += fovRef.current.aY * FRAME_DURATION;
+      //// end of y-coord adjustment
     }
     // end of update FOV
 
@@ -144,7 +156,11 @@ export default function GdGameCanvasP5(props) {
       }
 
       // render map entities
-      p5.fill("#fff");
+      if (entity.type === "finish") {
+        p5.fill("green");
+      } else {
+        p5.fill("#fff");
+      }
       if (entity.shape.alias === "rect") {
         p5.rect(
           // entity.x * ppu,
@@ -210,6 +226,10 @@ export default function GdGameCanvasP5(props) {
       setGamePause(false);
       setGameOver(true);
     }
+    if (pCharState.finish() && !gameOver) {
+      setGamePause(false);
+      setGameFinish(true);
+    }
 
     if (!gameOver && !gamePause) {
       const nextPChar = pCharState.getNextFramePChar(FRAME_DURATION, {
@@ -237,8 +257,8 @@ export default function GdGameCanvasP5(props) {
 
   function updatePpu() {
     ppu = Math.min(
-      (window.innerWidth - 60) / BASE_WIDTH,
-      (window.innerHeight - 200) / BASE_HEIGHT
+      (window.innerWidth - 0) / BASE_WIDTH,
+      (window.innerHeight - 0) / BASE_HEIGHT
     );
   }
 
