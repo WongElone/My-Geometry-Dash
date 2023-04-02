@@ -18,9 +18,9 @@ export default function GdHome() {
             >
               Start !
             </GdButton>
-            <GdButton onClick={() => setAppState({...appState, in: 'home->settings'})}>
+            {/* <GdButton onClick={() => setAppState({...appState, in: 'home->settings'})}>
               Settings
-            </GdButton>
+            </GdButton> */}
           </div>
         </section>
       )}

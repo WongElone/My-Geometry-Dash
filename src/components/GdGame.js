@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { AppContext } from "../App";
 import GdGameCanvasP5 from "./GdGameCanvasP5";
 import Loading from "./Loading";
@@ -36,6 +36,7 @@ export default function GdGame() {
   const [openGamePauseDialog, setOpenGamePauseDialog] = useState(false);
   const [gameFinish, setGameFinish] = useState(false);
   const [openGameFinishDialog, setOpenGameFinishDialog] = useState(false);
+  const {appState, setAppState} = useContext(AppContext);
 
   useEffect(() => {
     setOpenGameOverDialog(gameOver);
@@ -52,7 +53,7 @@ export default function GdGame() {
   // fetch map data from map raw data file, put the raw data in rawMapEntities
   useEffect(() => {
     const fetchData = async () => {
-      let resp = await axios.get("/entities.ett");
+      let resp = await axios.get(appState.game.map.entities);
       setRawMapEntities(await resp.data);
     };
 
@@ -296,14 +297,15 @@ export default function GdGame() {
                         onGiveUp={() => {
                           setAppState({ ...appState, in: "select-map", game: null });
                         }}
+                        mapName={appState.game.map.name}
                       />
                     }
-                    {!openGamePauseDialog && 
+                    {!gamePause && !gameOver && !gameFinish && 
                       <div style={{ zIndex: 10, position: "absolute", top: "45px", right: "45px" }}>
                         <GdIconButton
                           onClick={() => setGamePause(true)}
                         >
-                          ||
+                          ⏸︎
                         </GdIconButton>
                       </div>
                     }

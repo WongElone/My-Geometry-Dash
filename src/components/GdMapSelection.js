@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppContext } from "../App";
 import GdButton from "./GdButton";
 import GdMapSelectionCard from "./cards/GdMapSelectionCard";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "../css/gd-map-selection.scss";
-import sampleMapPV from "../images/sample-map-preview.png";
+import { MAPS_INFO_LIST } from "../constants";
+import GdIconButton from "./GdIconButton";
 
 export default function GdMapSelection() {
   const [startBtnProps, setStartBtnProps] = useState({
@@ -13,30 +14,13 @@ export default function GdMapSelection() {
     disabled: false,
   });
   const [mapSwiper, setMapSwiper] = useState(null);
-  const mapsInfoList = [
-    {
-      path: "./map_1_path",
-      name: "Map 1",
-    },
-    {
-      path: "./map_2_path",
-      name: "Map 2",
-    },
-    {
-      path: "./map_3_path",
-      name: "Map 3",
-    },
-    {
-      path: "./map_4_path",
-      name: "Map 4",
-    },
-  ];
 
   function startBtnClickHandler({ appState, setAppState }) {
-    const mapInfo = mapsInfoList[mapSwiper.activeIndex];
+    const mapInfo = MAPS_INFO_LIST[mapSwiper.activeIndex];
     const game = {
       map: {
-        path: mapInfo.path,
+        name: mapInfo.name,
+        entities: mapInfo.entities,
       },
     };
     setAppState({ ...appState, in: "game", game });
@@ -75,59 +59,25 @@ export default function GdMapSelection() {
               onTransitionStart={hideStartBtn}
               onTransitionEnd={showStartBtn}
             >
-              <SwiperSlide>
-                <GdMapSelectionCard>
-                  <img
-                    src={sampleMapPV}
-                    alt="sample map preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  ></img>
-                </GdMapSelectionCard>
-              </SwiperSlide>
-              <SwiperSlide>
-                <GdMapSelectionCard>
-                  <img
-                    src={sampleMapPV}
-                    alt="sample map preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  ></img>
-                </GdMapSelectionCard>
-              </SwiperSlide>
-              <SwiperSlide>
-                <GdMapSelectionCard>
-                  <img
-                    src={sampleMapPV}
-                    alt="sample map preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  ></img>
-                </GdMapSelectionCard>
-              </SwiperSlide>
-              <SwiperSlide>
-                <GdMapSelectionCard>
-                  <img
-                    src={sampleMapPV}
-                    alt="sample map preview"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  ></img>
-                </GdMapSelectionCard>
-              </SwiperSlide>
+              {MAPS_INFO_LIST.map((mapInfo, index) => (
+                <SwiperSlide key={index}>
+                  <GdMapSelectionCard>
+                    <img
+                      src={`/maps_thumbnails/map_${index + 1}_thumbnail.png`}
+                      alt={mapInfo.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    ></img>
+                  </GdMapSelectionCard>
+                </SwiperSlide>
+              ))}
             </Swiper>
+            <div className="map-name">
+              {typeof mapSwiper?.activeIndex === "number" && MAPS_INFO_LIST[mapSwiper.activeIndex].name}
+            </div>
           </div>
           <div className="btns-container">
             <GdButton
@@ -136,11 +86,16 @@ export default function GdMapSelection() {
               impulseBg={true}
               onClick={() => startBtnClickHandler({ appState, setAppState })}
             >
-              Start !
+              &#9654; Start
             </GdButton>
             <GdButton onClick={() => setAppState({ ...appState, in: "home" })}>
-              Back
+              ⮨ Back
             </GdButton>
+          </div>
+          <div className="back-icon-btn-container">
+            <GdIconButton onClick={() => setAppState({ ...appState, in: "home" })}>
+              ⮨
+            </GdIconButton>
           </div>
         </section>
       )}
