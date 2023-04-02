@@ -64,7 +64,6 @@ export default function GdMapSelection() {
                   <GdMapSelectionCard>
                     <img
                       src={`/maps_thumbnails/map_${index + 1}_thumbnail.png`}
-                      alt={mapInfo.name}
                       style={{
                         width: "100%",
                         height: "100%",

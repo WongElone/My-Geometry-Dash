@@ -1,12 +1,13 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
 
 export default function GdGameCanvasP5(props) {
-  const { gameOver, setGameOver, gamePause, setGamePause, gameFinish, setGameFinish, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
+  const { gameOver, setGameOver, gamePause, setGamePause, gameFinish, hoveringPauseBtn, setGameFinish, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
+  const [touchingCanvas, setTouchingCanvas] = useState(false);
 
   const p5_DEFAULTS = {
     fill: "#fff",
@@ -240,14 +241,16 @@ export default function GdGameCanvasP5(props) {
     // end of player character rendering
 
     // key event handling
-    if (p5.keyIsDown(32)) {
+    if (p5.keyIsDown(32) || (touchingCanvas && !gamePause && !hoveringPauseBtn.current)) {
       // press spacebar
       pCharState.jump();
     }
+
     if (p5.keyIsDown(27) && !gameOver) {
       // press esc
       setGamePause(true);
     }
+    console.debug("hoveringPauseBtn", hoveringPauseBtn.current);
     if (p5.keyIsDown(83)) {
       // console.log(pCharState);
       console.log(pCharRef.current.getPlayerCharStatesSet({ p5, neighbors }));
@@ -276,6 +279,13 @@ export default function GdGameCanvasP5(props) {
     }
   };
 
+  const touchStarted = (p5) => {
+    console.debug("touch start");
+    setTouchingCanvas(true)
+  };
+
+  const touchEnded = (p5) => setTouchingCanvas(false);
+
   const windowResized = (p5) => {
     updatePpu();
     fitCanvas(p5);
@@ -301,6 +311,10 @@ export default function GdGameCanvasP5(props) {
         draw={draw}
         windowResized={windowResized}
         keyPressed={keyPressed}
+        mousePressed={touchStarted}
+        touchStarted={touchStarted}
+        mouseReleased={touchEnded}
+        touchEnded={touchEnded}
       />
     </div>
   );

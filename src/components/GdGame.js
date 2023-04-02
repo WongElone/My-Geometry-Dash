@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { AppContext } from "../App";
 import GdGameCanvasP5 from "./GdGameCanvasP5";
 import Loading from "./Loading";
@@ -36,6 +36,7 @@ export default function GdGame() {
   const [openGamePauseDialog, setOpenGamePauseDialog] = useState(false);
   const [gameFinish, setGameFinish] = useState(false);
   const [openGameFinishDialog, setOpenGameFinishDialog] = useState(false);
+  const hoveringPauseBtn = useRef(false);
   const {appState, setAppState} = useContext(AppContext);
 
   useEffect(() => {
@@ -256,6 +257,7 @@ export default function GdGame() {
                       setGamePause={setGamePause}
                       gameFinish={gameFinish}
                       setGameFinish={setGameFinish}
+                      hoveringPauseBtn={hoveringPauseBtn}
                       mapData={mapData}
                       pCharData={pCharData}
                       BLOCK_UNIT={BLOCK_UNIT}
@@ -293,6 +295,7 @@ export default function GdGame() {
                         onClose={() => {
                           setOpenGamePauseDialog(false);
                           setGamePause(false);
+                          hoveringPauseBtn.current = false;
                         }}
                         onGiveUp={() => {
                           setAppState({ ...appState, in: "select-map", game: null });
@@ -304,6 +307,10 @@ export default function GdGame() {
                       <div style={{ zIndex: 10, position: "absolute", top: "45px", right: "45px" }}>
                         <GdIconButton
                           onClick={() => setGamePause(true)}
+                          onMouseEnter={() => hoveringPauseBtn.current = true}
+                          onMouseLeave={() => hoveringPauseBtn.current = false}
+                          onTouchStart={() => hoveringPauseBtn.current = true}
+                          onTouchEnd={() => hoveringPauseBtn.current = false}
                         >
                           ⏸︎
                         </GdIconButton>
