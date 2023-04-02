@@ -134,6 +134,65 @@ export default function GdGame() {
             x3: oX + 0.5 * BLOCK_UNIT,
             y3: oY + 0.8 * BLOCK_UNIT,
           }));
+        } else if (entity === "x") { // the border
+          // top triangle
+          mapEntities.push(new Entity({
+            shapeAlias: "tri",
+            type: "die",
+            penetrable: true,
+            p5_fill: "#333",
+            p5_stroke: "#333",
+            // everything in ppu
+            x1: oX,
+            y1: oY + BLOCK_UNIT,
+            x2: oX + BLOCK_UNIT,
+            y2: oY + BLOCK_UNIT,
+            x3: oX + 0.5 * BLOCK_UNIT,
+            y3: oY + 0.7 * BLOCK_UNIT,
+          }));
+          // // left side triangles
+          // for (let y = 1; y < 10; y++) {
+          //   mapEntities.push(new Entity({
+          //     shapeAlias: "tri",
+          //     type: "die",
+          //     penetrable: true,
+          //     // everything in ppu
+          //     x1: oX,
+          //     y1: oY + y * BLOCK_UNIT,
+          //     x2: oX - 0.3 * BLOCK_UNIT,
+          //     y2: oY + (y + 0.5) * BLOCK_UNIT,
+          //     x3: oX,
+          //     y3: oY + (y + 1) * BLOCK_UNIT,
+          //   }));
+          // }
+          // // right side triangles
+          // for (let y = 1; y < 10; y++) {
+          //   mapEntities.push(new Entity({
+          //     shapeAlias: "tri",
+          //     type: "die",
+          //     penetrable: true,
+          //     // everything in ppu
+          //     x1: oX + BLOCK_UNIT,
+          //     y1: oY + y * BLOCK_UNIT,
+          //     x2: oX + 1.3 * BLOCK_UNIT,
+          //     y2: oY + (y + 0.5) * BLOCK_UNIT,
+          //     x3: oX + BLOCK_UNIT,
+          //     y3: oY + (y + 1) * BLOCK_UNIT,
+          //   }));
+          // }
+          // pillar
+          mapEntities.push(new Entity({
+            shapeAlias: "rect",
+            type: "die",
+            penetrable: true,
+            p5_fill: "#333",
+            p5_stroke: "#333",
+            // everything in ppu
+            x: oX,
+            y: oY + BLOCK_UNIT,
+            width: BLOCK_UNIT,
+            height: BLOCK_UNIT * 50,
+          }));
         } else if (entity === "f") {
           finishPointOX = oX;
         } else {
@@ -149,6 +208,8 @@ export default function GdGame() {
       shapeAlias: "rect",
       type: "finish",
       penetrable: true,
+      p5_fill: "green",
+      p5_stroke: "green",
       // everything in ppu
       x: finishPointOX,
       y: - BLOCK_UNIT * 50,

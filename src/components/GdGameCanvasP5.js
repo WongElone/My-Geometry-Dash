@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import Sketch from "react-p5";
 import p5Collide2dInit from "../plugins/p5.collide2d.init";
 import PlayerChar from "../customs/PlayerChar";
@@ -7,6 +7,17 @@ export default function GdGameCanvasP5(props) {
   const { gameOver, setGameOver, gamePause, setGamePause, gameFinish, setGameFinish, mapData, pCharData, BASE_WIDTH, BASE_HEIGHT, BLOCK_UNIT, FOV_SETTINGS } = props;
   const FRAME_RATE = 60; // frames per second
   const FRAME_DURATION = 1 / FRAME_RATE; // second
+
+  const p5_DEFAULTS = {
+    fill: "#fff",
+    stroke: "#999",
+    strokeWeight: 1,
+  }
+  const p5_settings = useRef({
+    fill: p5_DEFAULTS.fill,
+    stroke: p5_DEFAULTS.stroke,
+    strokeWeight: p5_DEFAULTS.strokeWeight,
+  });
 
   const pCharRef = useRef(
     new PlayerChar({
@@ -141,8 +152,6 @@ export default function GdGameCanvasP5(props) {
     }
 
     neighbors = [];
-    p5.strokeWeight(1);
-    p5.stroke("#999");
     for (let entity of mapEntitiesToRender) {
       if (
         ((pCharRef.current.x - entity.x) ** 2 +
@@ -155,18 +164,38 @@ export default function GdGameCanvasP5(props) {
         neighbors.push(entity);
       }
 
-      // render map entities
-      if (entity.type === "finish") {
-        p5.fill("green");
-      } else {
-        p5.fill("#fff");
+      // adjust p5 drawing params
+      const p5AttrsFuncMapper = {
+        fill: (...params) => p5.fill(...params),
+        stroke: (...params) => p5.stroke(...params),
+        strokeWeight: (...params) => p5.strokeWeight(...params),
       }
+      //// for debug
+      // if (entity[`p5_${'fill'}`]) {
+      //   p5_settings.current['fill'] = entity[`p5_${'fill'}`];
+      //   p5.fill(p5_settings.current['fill']);
+      // } else if (p5_settings.current['fill'] !== p5_DEFAULTS['fill']) {
+      //   p5_settings.current['fill'] = p5_DEFAULTS['fill'];
+      //   p5.fill(p5_settings.current['fill']);
+      // }
+      //// end of for debug
+      for (let p5Attr in p5AttrsFuncMapper) {
+        if (entity[`p5_${p5Attr}`] 
+        // FIXME: Why when add below condition will cause bug?
+        // && p5_settings.current[p5Attr] !== entity[`p5_${p5Attr}`]
+        ) {
+          p5_settings.current[p5Attr] = entity[`p5_${p5Attr}`];
+          p5AttrsFuncMapper[p5Attr](p5_settings.current[p5Attr]);
+        } else if (p5_settings.current[p5Attr] !== p5_DEFAULTS[p5Attr]) {
+          p5_settings.current[p5Attr] = p5_DEFAULTS[p5Attr];
+          p5AttrsFuncMapper[p5Attr](p5_settings.current[p5Attr]);
+        }
+      }
+      // end of adjust p5 drawing params
+
+      // render map entities
       if (entity.shape.alias === "rect") {
         p5.rect(
-          // entity.x * ppu,
-          // entity.y * ppu,
-          // entity.width * ppu,
-          // entity.height * ppu
           (entity.x - fovRef.current.x) * ppu,
           (entity.y - fovRef.current.y) * ppu,
           entity.width * ppu,
@@ -189,14 +218,17 @@ export default function GdGameCanvasP5(props) {
     // determine state
     const PCharState = pCharRef.current.getPlayerCharState({ p5, neighbors });
     const pCharState = new PCharState(pCharRef.current);
-    console.log(PCharState);
+    // console.log(PCharState);
     // end of determine state
 
     // player character rendering
+    p5_settings.current.strokeWeight = 0;
     p5.strokeWeight(0);
     if (pCharState.dead()) {
+      p5_settings.current.fill = "red";
       p5.fill("red");
     } else {
+      p5_settings.current.fill = "yellow";
       p5.fill("yellow");
     }
     p5.quad(...pCharRef.current.getVerticesPpu().map((p, index) => {

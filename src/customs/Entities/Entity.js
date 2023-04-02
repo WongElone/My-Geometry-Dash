@@ -6,6 +6,9 @@ export default class Entity {
     shapeAlias,
     type,
     penetrable,
+    p5_fill,
+    p5_stroke,
+    p5_strokeWeight,
     // everything in ppu
     x,
     x1,
@@ -61,6 +64,9 @@ export default class Entity {
 
     this.type = type;
     this.penetrable = penetrable;
+    this.p5_fill = p5_fill;
+    this.p5_stroke = p5_stroke;
+    this.p5_strokeWeight = p5_strokeWeight;
   }
 
 }

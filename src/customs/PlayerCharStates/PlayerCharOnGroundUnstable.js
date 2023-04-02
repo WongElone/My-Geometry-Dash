@@ -23,11 +23,9 @@ export default class PlayerCharOnGroundUnstable extends PlayerCharState {
             const oldContactVertice = nextPChar.getLowestVertice();
             // rotate around pivot at touching corner
             // if included angle between diagonal of contact and ground is positive
-            // console.log(nextPChar.getAngleOfElevation() * 180 / Math.PI);
             let angleOfElevation = nextPChar.getAngleOfElevation();
             if (angleOfElevation < Math.PI / 3) {
                 // clockwise rotation
-                // console.log("clockwise rotation");
 
                 const angularDisplace = nextPChar.vRad * FRAME_DURATION;
                 nextPChar.rad = (angularDisplace > angleOfElevation) ? 0 : nextPChar.rad + angularDisplace;
@@ -35,7 +33,6 @@ export default class PlayerCharOnGroundUnstable extends PlayerCharState {
                 nextPChar.y += oldContactVertice[1] - nextPChar.getLowestVertice()[1];
             } else {
                 // anticlockwise rotation
-                console.log("anticlocwise rotation");
 
                 // nextPChar.rad = 0;
                 // nextPChar.y += oldContactVertice[1] - nextPChar.getLowestVertice()[1];
