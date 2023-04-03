@@ -70,13 +70,13 @@ export default class PlayerCharOnGroundUnstable extends PlayerCharState {
           // if collided to any entity of die type, then no need to adjust position of pChar
           let breaker = false;
           for (let collision of result.collisions) {
-            if (collision.entity.type === "die") breaker = true;
+            if (collision.entity.type === "die" || collision.entity.penetrable) breaker = true;
           }
           if (breaker) break;
     
           // adjust x, y, rad
-          // nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x
-          nextPChar.y -= Math.sign(nextPChar.vY) * nextPChar.contactThreshold; // reduce y
+          nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x
+        //   nextPChar.y -= Math.sign(nextPChar.vY) * nextPChar.contactThreshold; // reduce y
           nextPChar.rad -= Math.sign(nextPChar.vRad) * Math.PI / 180; // reduce one degree
         }
         return nextPChar;

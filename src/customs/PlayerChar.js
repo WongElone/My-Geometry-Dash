@@ -52,6 +52,7 @@ export default class PlayerChar {
       FallFromGround: PlayerCharFallFromGround,
       Finish: PlayerCharFinish,
     });
+    this.prev = null;
   }
 
   isParallel() {
@@ -93,6 +94,10 @@ export default class PlayerChar {
 
     const states = new Set();
 
+    if (this.prev && this.prev.x === this.x) {
+      states.add(this.allStates.Die);
+      return states;
+    }
     if (
       nonPenetrableNeigborsContactResult.contacts.length === 0 &&
       penetrableNeigborsContactResult.contacts.length === 0
@@ -100,6 +105,7 @@ export default class PlayerChar {
       states.add(this.allStates.FreeFall);
       return states;
     }
+    
     if (penetrableNeigborsContactResult.contacts.length) {
       for (let contact of penetrableNeigborsContactResult.contacts) {
         const entity = contact.entity;
@@ -123,6 +129,19 @@ export default class PlayerChar {
           ).length > 0
         ) {
           // center of pChar are below entity but not all 4 vertices below entity
+          states.add(this.allStates.Die);
+        }
+
+        if (
+          entity.shape.alias === "rect" &&
+          entity.y + entity.height < this.y &&
+          getVerticesAboveYLevel(
+            this.getVerticesPpu(),
+            entity.y + entity.height
+          ).length === 0
+        ) {
+          // center of pChar are below entity but not all 4 vertices below entity
+          // FIXME: later finish PlayerCharHitCeiling.js and assing the state for this situation
           states.add(this.allStates.Die);
         }
 
@@ -177,7 +196,8 @@ export default class PlayerChar {
     const states = this.getPlayerCharStatesSet({ p5, neighbors });
 
     if (states.size === 0) {
-      // return PlayerCharState;
+      // FIXME: remove this cheat and find out unhandled other states
+      return this.allStates.Die;
       console.error("empty state set");
       throw new Error("empty state set");
     }
@@ -195,6 +215,8 @@ export default class PlayerChar {
     } else if (states.has(this.allStates.FreeFall)) {
       return this.allStates.FreeFall;
     } else {
+      // FIXME: remove this cheat and find out unhandled other states
+      return this.allStates.Die;
       console.error("unknown handled state");
       throw new Error("unknown handled state");
     }

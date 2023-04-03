@@ -16,6 +16,11 @@ export default class PlayerCharOnGroundStable extends PlayerCharState {
 
   getNextFramePChar(FRAME_DURATION) { // frame duration = time taken for one frame
     const nextPChar = this.pChar;
+    nextPChar.prev = {
+      x: this.pChar.x,
+      y: this.pChar.y,
+      rad: this.pChar.rad,
+    }
     nextPChar.x += nextPChar.vX * FRAME_DURATION;
     nextPChar.y += nextPChar.vY * FRAME_DURATION;
     nextPChar.rad += nextPChar.vRad * FRAME_DURATION;
@@ -39,9 +44,9 @@ export default class PlayerCharOnGroundStable extends PlayerCharState {
       if (breaker) break;
 
       // adjust x, y, rad
-      // nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x
+      nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x
       nextPChar.y -= Math.sign(nextPChar.vY) * nextPChar.contactThreshold; // reduce y
-      nextPChar.rad -= Math.sign(nextPChar.vRad) * Math.PI / 180; // reduce one degree
+      // nextPChar.rad -= Math.sign(nextPChar.vRad) * Math.PI / 180; // reduce one degree
     }
     return nextPChar;
   }

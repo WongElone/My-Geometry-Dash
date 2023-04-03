@@ -305,7 +305,7 @@ export default function GdGame() {
                       />
                     }
                     {!gamePause && !gameOver && !gameFinish && 
-                      <div style={{ zIndex: 10, position: "absolute", top: "45px", right: "45px" }}>
+                      <div className="pause-btn-container">
                         <GdIconButton
                           onClick={() => setGamePause(true)}
                           onMouseEnter={() => hoveringPauseBtn.current = true}
@@ -313,6 +313,8 @@ export default function GdGame() {
                           onTouchStart={() => hoveringPauseBtn.current = true}
                           onTouchEnd={() => hoveringPauseBtn.current = false}
                           icon={PauseIcon}
+                          width={"30px"}
+                          height={"30px"}
                         />
                       </div>
                     }
