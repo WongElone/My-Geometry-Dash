@@ -7,6 +7,8 @@ import "swiper/css";
 import "../css/gd-map-selection.scss";
 import { MAPS_INFO_LIST } from "../constants";
 import GdIconButton from "./GdIconButton";
+import StartIcon from "../images/icons/play-6-64.png";
+import BackIcon from "../images/icons/arrow-81-64.png";
 
 export default function GdMapSelection() {
   const [startBtnProps, setStartBtnProps] = useState({
@@ -85,16 +87,23 @@ export default function GdMapSelection() {
               impulseBg={true}
               onClick={() => startBtnClickHandler({ appState, setAppState })}
             >
-              &#9654; Start
+              {/* &#9654;  */}
+              <img src={StartIcon} className="icon-img" />
+              &nbsp;Start
             </GdButton>
             <GdButton onClick={() => setAppState({ ...appState, in: "home" })}>
-              ⮨ Back
+              {/* ⮨ */}
+              <img src={BackIcon} className="icon-img" />
+              &nbsp;Back
             </GdButton>
           </div>
           <div className="back-icon-btn-container">
-            <GdIconButton onClick={() => setAppState({ ...appState, in: "home" })}>
-              ⮨
-            </GdIconButton>
+            <GdIconButton 
+              onClick={() => setAppState({ ...appState, in: "home" })} 
+              icon={BackIcon}
+              width={"30px"}
+              height={"30px"}
+            />
           </div>
         </section>
       )}

@@ -9,6 +9,7 @@ import GdGameOverDialog from "./dialogs/GdGameOverDialog";
 import GdGamePauseDialog from "./dialogs/GdGamePauseDialog";
 import GdIconButton from "./GdIconButton";
 import GdGameFinishDialog from "./dialogs/GdGameFinishDialog";
+import PauseIcon from "../images/icons/pause-64.png";
 
 export default function GdGame() {
   const BASE_WIDTH = 640 * 3; // ppu
@@ -311,9 +312,8 @@ export default function GdGame() {
                           onMouseLeave={() => hoveringPauseBtn.current = false}
                           onTouchStart={() => hoveringPauseBtn.current = true}
                           onTouchEnd={() => hoveringPauseBtn.current = false}
-                        >
-                          ⏸︎
-                        </GdIconButton>
+                          icon={PauseIcon}
+                        />
                       </div>
                     }
                   </div>

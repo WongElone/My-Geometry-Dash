@@ -1,6 +1,7 @@
 import React from "react";
 import GdIconButton from "../GdIconButton";
 import "../../css/dialogs/gd-dialog.scss";
+import CloseIcon from "../../images/icons/x-mark-64.png";
 
 export default function GdGameBaseDialog(props) {
   const { setOpen, onClose, children } = props;
@@ -27,9 +28,10 @@ export default function GdGameBaseDialog(props) {
                 setOpen(false);
                 onClose();
               }}
-            >
-              &times;
-            </GdIconButton>
+              icon={CloseIcon}
+              width={"30px"}
+              height={"30px"}
+            />
           </div>
           {children}
         </article>
