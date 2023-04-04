@@ -7,7 +7,7 @@ export default class PlayerCharFinish extends PlayerCharState {
   }
 
   getNextFramePChar(FRAME_DURATION) {
-    return this.pChar;
+    return super.getNextFramePChar(FRAME_DURATION);
   }
 
   finish() {

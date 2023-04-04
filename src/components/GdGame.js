@@ -221,6 +221,11 @@ export default function GdGame() {
     }));
     // end of add map entities
 
+    // map entities sorting by type
+    // safe > die > finish
+    const priorityScore = { safe: 2, die: 1, finish: 0 }
+    mapEntities.sort((a, b) => priorityScore[b.type] - priorityScore[a.type]);
+
     console.log("Map Entities", mapEntities);
     setMapData({ ...mapData, entities: mapEntities });
   }, [rawMapEntities]);

@@ -15,12 +15,7 @@ export default class PlayerCharOnGroundStable extends PlayerCharState {
   }
 
   getNextFramePChar(FRAME_DURATION) { // frame duration = time taken for one frame
-    const nextPChar = this.pChar;
-    nextPChar.prev = {
-      x: this.pChar.x,
-      y: this.pChar.y,
-      rad: this.pChar.rad,
-    }
+    const nextPChar = super.getNextFramePChar(FRAME_DURATION);
     nextPChar.x += nextPChar.vX * FRAME_DURATION;
     nextPChar.y += nextPChar.vY * FRAME_DURATION;
     nextPChar.rad += nextPChar.vRad * FRAME_DURATION;
@@ -28,20 +23,18 @@ export default class PlayerCharOnGroundStable extends PlayerCharState {
   }
 
   adjustNextFramePChar({ p5, nextPChar, neighbors }) {
-    while (true) {
+    for (let n = 1; n < 999; n ++) {
       // check collision with non penetrable entities
-      const result = nextPChar.getCollisionReport({ p5, entities: neighbors });
-      // if no collision with non penetrable entities, set penetration to false
+      const result = nextPChar.getCollisionReport({ p5, entities: neighbors.filter(e => !e.penetrable) });
+      // if no collision with non penetrable entities, just break
       if (!result.collisions.length) {
         break;
       }
 
       // if collided to any entity of die type, then no need to adjust position of pChar
-      let breaker = false;
       for (let collision of result.collisions) {
-        if (collision.entity.type === "die" || collision.entity.penetrable) breaker = true;
+        if (collision.entity.type === "die") return;
       }
-      if (breaker) break;
 
       // adjust x, y, rad
       nextPChar.x -= Math.sign(nextPChar.vX) * nextPChar.contactThreshold; // reduce x

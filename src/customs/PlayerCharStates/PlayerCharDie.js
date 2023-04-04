@@ -1,16 +1,16 @@
 import PlayerCharState from "./PlayerCharState";
 
 export default class PlayerCharDie extends PlayerCharState {
-    constructor(pChar) {
-        super(pChar);
-        this.pChar = pChar;
-    }
+  constructor(pChar) {
+    super(pChar);
+    this.pChar = pChar;
+  }
 
-    getNextFramePChar(FRAME_DURATION) {
-        return this.pChar;
-    }
+  getNextFramePChar(FRAME_DURATION) {
+    return super.getNextFramePChar(FRAME_DURATION);
+  }
 
-    dead() {
-        return true;
-    }
+  dead() {
+    return true;
+  }
 }

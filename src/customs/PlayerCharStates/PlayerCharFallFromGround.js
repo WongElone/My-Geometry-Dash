@@ -11,7 +11,7 @@ export default class PlayerCharFallFromGround extends PlayerCharState {
   }
 
   getNextFramePChar(FRAME_DURATION, { p5, neighbors }) {
-    const nextPChar = this.pChar;
+    const nextPChar = super.getNextFramePChar(FRAME_DURATION);
 
     // fall
     nextPChar.x += nextPChar.vX * FRAME_DURATION + 0.5 * nextPChar.aX * (FRAME_DURATION ** 2);
@@ -24,23 +24,32 @@ export default class PlayerCharFallFromGround extends PlayerCharState {
 
     // adjust rad
     let angleReverse = false;
-    let loopCount = 0;
-    while (loopCount < 9999) {
-      loopCount += 1;
-      const report = nextPChar.getCollisionReport({ p5, entities: neighbors});
-      if (!report.collisions.length) break;
+    let breaker = false;
+    for (let n = 0; n < 9; n ++) {
+      for (let m = 0; m < 361; m ++) {
+        // check collision with non penetrable entities
+        const report = nextPChar.getCollisionReport({ p5, entities: neighbors.filter(e => !e.penetrable) });
+        // if no collision with non penetrable entities, just break
+        if (!report.collisions.length) {
+          breaker = true;
+          break;
+        }
 
-      if (nextPChar.rad - oldRad > Math.PI * 0.5) {
-        angleReverse = true;
-        nextPChar.rad = oldRad - Math.PI / 180;
-        continue;
-      }
+        if (nextPChar.rad - oldRad > Math.PI * 0.5) {
+          angleReverse = true;
+          nextPChar.rad = oldRad - Math.PI / 180;
+          continue;
+        }
 
-      if (angleReverse) {
-        nextPChar.rad -= Math.PI / 180;
-      } else {
-        nextPChar.rad += Math.PI / 180;
+        if (angleReverse) {
+          nextPChar.rad -= Math.PI / 180;
+        } else {
+          nextPChar.rad += Math.PI / 180;
+        }
       }
+      if (breaker) break;
+      // nextPChar.y -= 0.1 * nextPChar.vY; // reduce y
+      nextPChar.y -= Math.sign(nextPChar.vY) * nextPChar.contactThreshold; // reduce y
     }
 
     // new angular velocity

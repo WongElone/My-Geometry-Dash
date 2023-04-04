@@ -94,9 +94,10 @@ export default class PlayerChar {
 
     const states = new Set();
 
-    if (this.prev && this.prev.x === this.x) {
+    // FIXME: revise conditions
+    if (this.prev && this.prev.x === this.x && this.isParallel()) {
       states.add(this.allStates.Die);
-      return states;
+      // return states;
     }
     if (
       nonPenetrableNeigborsContactResult.contacts.length === 0 &&
@@ -202,10 +203,10 @@ export default class PlayerChar {
       throw new Error("empty state set");
     }
 
-    if (states.has(this.allStates.Die)) {
-      return this.allStates.Die;
-    } else if (states.has(this.allStates.Finish)) {
+    if (states.has(this.allStates.Finish)) {
       return this.allStates.Finish;
+    } else if (states.has(this.allStates.Die)) {
+      return this.allStates.Die;
     } else if (states.has(this.allStates.OnGroundStabe)) {
       return this.allStates.OnGroundStabe;
     } else if (states.has(this.allStates.OnGroundUnstable)) {

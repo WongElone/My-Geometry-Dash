@@ -10,8 +10,15 @@ export default class PlayerCharState {
 
   getNextFramePChar(FRAME_DURATION) { // frame duration = time taken for one frame
     const nextPChar = this.pChar;
-    // update position of nextPChar
+    nextPChar.prev = {
+      x: this.pChar.x,
+      y: this.pChar.y,
+      rad: this.pChar.rad,
+    }
     return nextPChar;
+    // children class should override this method
+    // by creating a variable and call super.getNextFramePChar (const nextPChar = super.getNextFramePChar();)
+    // and then update position of nextPChar
   }
 
   adjustNextFramePChar({ p5, nextPChar, neighbors }) {

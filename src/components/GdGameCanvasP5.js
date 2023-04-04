@@ -154,6 +154,8 @@ export default function GdGameCanvasP5(props) {
 
     neighbors = [];
     for (let entity of mapEntitiesToRender) {
+      p5.fill("#333");
+      p5.fill("#444");
       if (
         ((pCharRef.current.x - entity.x) ** 2 +
           (pCharRef.current.y - entity.y) ** 2) **
@@ -180,18 +182,22 @@ export default function GdGameCanvasP5(props) {
       //   p5.fill(p5_settings.current['fill']);
       // }
       //// end of for debug
-      for (let p5Attr in p5AttrsFuncMapper) {
-        if (entity[`p5_${p5Attr}`] 
-        // FIXME: Why when add below condition will cause bug?
-        // && p5_settings.current[p5Attr] !== entity[`p5_${p5Attr}`]
-        ) {
-          p5_settings.current[p5Attr] = entity[`p5_${p5Attr}`];
-          p5AttrsFuncMapper[p5Attr](p5_settings.current[p5Attr]);
-        } else if (p5_settings.current[p5Attr] !== p5_DEFAULTS[p5Attr]) {
-          p5_settings.current[p5Attr] = p5_DEFAULTS[p5Attr];
-          p5AttrsFuncMapper[p5Attr](p5_settings.current[p5Attr]);
-        }
-      }
+      // for (let p5Attr in p5AttrsFuncMapper) {
+      //   if (entity[`p5_${p5Attr}`] 
+      //   // FIXME: Why when add below condition will cause bug?
+      //   // && p5_settings.current[p5Attr] !== entity[`p5_${p5Attr}`]
+      //   ) {
+      //     p5_settings.current[p5Attr] = entity[`p5_${p5Attr}`];
+      //     p5AttrsFuncMapper[p5Attr](p5_settings.current[p5Attr]);
+      //   } else if (p5_settings.current[p5Attr] !== p5_DEFAULTS[p5Attr]) {
+      //     p5_settings.current[p5Attr] = p5_DEFAULTS[p5Attr];
+      //     p5AttrsFuncMapper[p5Attr](p5_settings.current[p5Attr]);
+      //   }
+      // }
+      // console.debug(entity.p5_fill);
+      p5.fill(entity.p5_fill || p5_DEFAULTS.fill);
+      p5.stroke(entity.p5_stroke || p5_DEFAULTS.stroke);
+      p5.strokeWeight(entity.p5_strokeWeight || p5_DEFAULTS.strokeWeight);
       // end of adjust p5 drawing params
 
       // render map entities
@@ -250,9 +256,8 @@ export default function GdGameCanvasP5(props) {
       // press esc
       setGamePause(true);
     }
-    console.debug("hoveringPauseBtn", hoveringPauseBtn.current);
+
     if (p5.keyIsDown(83)) {
-      // console.log(pCharState);
       console.log(pCharRef.current.getPlayerCharStatesSet({ p5, neighbors }));
     }
     // end of key event handling
@@ -280,7 +285,6 @@ export default function GdGameCanvasP5(props) {
   };
 
   const touchStarted = (p5) => {
-    console.debug("touch start");
     setTouchingCanvas(true)
   };
 
