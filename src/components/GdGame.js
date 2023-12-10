@@ -237,7 +237,7 @@ export default function GdGame() {
     if (!isLoadingMap) return;
 
     const timerId = setTimeout(() => {
-      if (mapData.entities.length) {
+      if (mapData?.entities?.length) {
         setIsLoadingMap(false);
       }
     }, 1000);

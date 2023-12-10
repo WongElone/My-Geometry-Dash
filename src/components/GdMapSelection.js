@@ -65,7 +65,7 @@ export default function GdMapSelection() {
                 <SwiperSlide key={index}>
                   <GdMapSelectionCard>
                     <img
-                      src={`/maps_thumbnails/map_${index + 1}_thumbnail.png`}
+                      src={mapInfo.thumbnail}
                       style={{
                         width: "100%",
                         height: "100%",
