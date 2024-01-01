@@ -1,6 +1,6 @@
 # My Geometry Dash
 ## ✨Demo link✨  
-~~https://demo-my-geometry-dash.elonewong.com~~  
+https://demo-my-geometry-dash.elonewong.com  
 ## This is my side project for practicing [React.js](https://reactjs.org/) and [p5.js](https://p5js.org/).
 
 ### Acknowledgement:
